@@ -7,12 +7,20 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 	$scope.animationIndex = 0;
 	$scope.context = null;
 	$scope.canvasWidth = 0;	
-		
+	
+	$scope.odometer = 0;		
 	$scope.screen = 'TRAVEL';
 	
 	$scope.wagonImage1 = null;
 	$scope.wagonImage2 = null;
 	$scope.emigrationCanyonImage = null;
+	$scope.audio = [
+		{ 'src': 'audio/come-come-ye-saints.mp3' },
+		{ 'src': 'audio/pioneer-children-sang-as-they-walked.mp3' },
+		{ 'src': 'audio/the-handcart-song.mp3' },
+		{ 'src': 'audio/the-oxcart.mp3' },
+		{ 'src': 'audio/to-be-a-pioneer.mp3' }
+	];
 		
 	$scope.clearCanvas = function() {
 		$scope.context
@@ -39,6 +47,41 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		}
 	}
 	
+	$scope.getAudioBySrc = function(src) {
+		for (var i = 0; i < $scope.audio.length; i++) {
+			var song = $scope.audio[i];
+			if (song.src === src) {
+				return song;
+			}
+		}
+		return null;
+	}
+	
+	$scope.playAudio = function(src) {
+		var song = $scope.getAudioBySrc(src);
+		if (typeof song.element == 'undefined') {					
+			console.log('ERROR: Audio ' + src + ' has not been loaded yet!');
+		}
+		else {
+			song.element.currentTime = 0;
+			song.element.play();
+		}
+	}
+	
+	$scope.loadAudio = function() {	
+		for (var i = 0; i < $scope.audio.length; i++) {
+			var song = $scope.audio[i];
+			var element = document.createElement('audio');
+			element.preload = 'auto';
+			element.audioId = song.src;
+			element.addEventListener('canplay', function() {
+				var song = $scope.getAudioBySrc(this.audioId);
+				song.element = this;
+			}, false);
+			element.src = song.src;
+		}
+	}
+	
 	$scope.loadImages = function(onload) {
 		$scope.wagonImage1 = new Image;
 		$scope.wagonImage1.crossOrigin = '';
@@ -56,27 +99,9 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		$scope.emigrationCanyonImage.src = 'img/emigration-canyon.gif';
 	}
 	
-	$scope.init = function() {	
-		var canvas = document.getElementById('game');
-		var ctx = canvas.getContext('retro');
-		
-		$scope.context = ctx;
-		
-		var res = ctx.resolution(),
-		w = res.width,
-		h = res.height,
-		canvasWidth = (w * 0.5)|0;
-		$scope.canvasWidth = canvasWidth;
-		
-		$scope.loadImages(function() {
-			ctx
-				.palette('APPLEII')
-				.addFonts([fontC64, fontRetroBig], $scope.update, function() { console.log('A font is missing...'); });
-		});
-	}
-	
 	$scope.renderWalkingScreen = function() {
 		$scope.drawTextAtLine('The Mormon Trail', 1);
+		$scope.drawTextAtLine('Miles traveled: ' + $scope.odometer + ' miles', 21);
 		$scope.drawWagon();		
 	}
 	
@@ -92,7 +117,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		$scope.clearCanvas();
 		
 		switch ($scope.screen) {
-			case 'TRAVEL':			
+			case 'TRAVEL':
 				$scope.renderWalkingScreen();
 				break;
 			default:
@@ -101,12 +126,49 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		}
 	}
 	
+	$scope.playARandomTrailSong = function() {
+		var randomIndexExceptVictorySong = Math.floor(Math.random() * ($scope.audio.length - 1)) + 1;
+		$scope.playAudio($scope.audio[randomIndexExceptVictorySong].src);
+	}
+	
+	$scope.ensureThatASongIsPlaying = function() {
+		for (var i = 0; i < $scope.audio.length; i++) {
+			var song = $scope.audio[i];			
+			if (typeof song.element != 'undefined' && song.element.currentTime != 0 && song.element.currentTime < song.element.duration) {
+				return;
+			}
+		}
+		
+		$scope.playARandomTrailSong();
+	}
+	
+	$scope.stopAllAudio = function() {
+		for (var i = 0; i < $scope.audio.length; i++) {
+			var song = $scope.audio[i];
+			if (typeof song.element != 'undefined') {
+				song.element.pause();
+				song.element.currentTime = 0;
+			}
+		}		
+	}
+	
 	$scope.update = function() {
 		var framesPerSecond = 2;
 		
 		var now = new Date();
 		var timeSinceLastUpdate = now.getTime() - $scope.lastUpdated.getTime();
-					
+
+		if ($scope.screen == 'TRAVEL') {
+			$scope.ensureThatASongIsPlaying();
+			$scope.odometer += 10;
+		
+			if ($scope.odometer >= 1300) {
+				$scope.screen = 'VICTORY';
+				$scope.stopAllAudio();
+				$scope.playAudio('audio/come-come-ye-saints.mp3');
+			}
+		}
+		
 		$scope.render();
 		
 		if ($scope.animationIndex == 0) {
@@ -116,12 +178,28 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 			$scope.animationIndex = 0;
 		}
 		
-		if (Math.random() > 0.99) {
-			$scope.screen = 'VICTORY';
-		}
-		
 		$scope.lastUpdated = now;		
 		$timeout($scope.update, 1000 / framesPerSecond);
+	}
+	
+	$scope.init = function() {	
+		var canvas = document.getElementById('game');
+		var ctx = canvas.getContext('retro');
+		
+		$scope.context = ctx;
+		
+		var res = ctx.resolution(),
+		w = res.width,
+		h = res.height,
+		canvasWidth = (w * 0.5)|0;
+		$scope.canvasWidth = canvasWidth;
+		
+		$scope.loadAudio();
+		$scope.loadImages(function() {
+			ctx
+				.palette('APPLEII')
+				.addFonts([fontC64, fontRetroBig], $scope.update, function() { console.log('A font is missing...'); });
+		});
 	}
 	
 	$scope.init();	
