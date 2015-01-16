@@ -1,90 +1,33 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<title>The Mormon Trail</title>
-	
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />
-	
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>The Mormon Trail</title>
+
 	<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js"></script>
-	
-	<style type="text/css">
-	
-		@font-face {
-			font-family: HereLiesMECC;
-			src: url(fonts/mecc.ttf);
-			font-weight:400;
-		}
-		
-		* {
-			font-family: HereLiesMECC, Courier New;
-			font-size: 12pt;
-		}
-		
-		body {
-			background: #000;
-			color: #fff;
-		}
-		
-		.white-table {
-			background: #fff;
-			color: #000;
-		}
-		
-		.white-table .property {
-			float: left;
-			margin-right: 0.5%;
-			text-align: right;
-			width: 49.5%;
-		}
-		
-		.white-table .value {
-			margin-left: 0.5%;
-			float: right;
-			width: 49.5%;
-		}
-	
-	</style>
+	<script src="js/retro.js"></script>
+	<script src="js/retro.color.js"></script>
+	<script src="js/retro.context.js"></script>
+	<script src="js/retro.palette.js"></script>
+	<script src="js/retro.palettes.js"></script>
+	<script src="js/retro.point.js"></script>
+	<script src="js/retro.polyfills.js"></script>
+	<script src="js/retro.fonts.js"></script>		
+	<script src="js/gameApp.js"></script>
+	<script src="js/gameController.js"></script>
 	
 </head>
 <body>
 
-<p>Kevin has cholera.</p>
-<p>Press ENTER to size up the situation</p>
-<div class="white-table">
-	<div>
-		<div class="property">Date:</div>
-		<div class="value">June 6, 1847</div>	
-		<div style="clear:both;"></div>
-	</div>
-	<div>
-		<div class="property">Weather:</div>
-		<div class="value">hot</div>
-		<div style="clear:both;"></div>
-	</div>
-	<div>
-		<div class="property">Health:</div>
-		<div class="value">good</div>
-		<div style="clear:both;"></div>
-	</div>
-	<div>
-		<div class="property">Food:</div>
-		<div class="value">1925 pounds</div>
-		<div style="clear:both;"></div>
-	</div>
-	<div>
-		<div class="property">Next landmark:</div>
-		<div class="value">2 miles</div>
-		<div style="clear:both;"></div>
-	</div>
-	<div>
-		<div class="property">Miles traveled:</div>
-		<div class="value">100 miles</div>
-		<div style="clear:both;"></div>
-	</div>
-</div>
-<p>Press SPACE BAR to continue</p>
-		
+	<div ng-app="gameApp">
+        <div ng-controller="gameController">
+            <canvas id="game" width="840" height="576" data-width="280" data-height="192">
+                <h1>Sorry, this browser does not have support for needed canvas / HTML5</h1>
+            </canvas>
+		</div>
+    </div>
+
 </body>
 </html>
