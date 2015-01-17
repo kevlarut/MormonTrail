@@ -32,12 +32,12 @@ var artist = new function() {
 		artist.wagonImage1 = new Image;
 		artist.wagonImage1.crossOrigin = '';
 		//artist.wagonImage1.onload = onload;
-		artist.wagonImage1.src = 'img/wagon1.gif';
+		artist.wagonImage1.src = 'img/handcart1.gif';
 		
 		artist.wagonImage2 = new Image;
 		artist.wagonImage2.crossOrigin = '';
 		artist.wagonImage2.onload = onload;
-		artist.wagonImage2.src = 'img/wagon2.gif';
+		artist.wagonImage2.src = 'img/handcart2.gif';
 	}
 	
 	this.init = function() {	

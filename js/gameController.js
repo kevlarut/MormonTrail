@@ -40,10 +40,10 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		
 	$scope.drawWagon = function() {	
 		if ($scope.animationIndex === 0) {
-			$scope.context.drawImage($scope.wagonImage1, 170, 40);
+			$scope.context.drawImage($scope.wagonImage1, 200, 40);
 		}
 		else {
-			$scope.context.drawImage($scope.wagonImage2, 170, 40);
+			$scope.context.drawImage($scope.wagonImage2, 200, 40);
 		}
 	}
 	
@@ -86,12 +86,12 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		$scope.wagonImage1 = new Image;
 		$scope.wagonImage1.crossOrigin = '';
 		//$scope.wagonImage1.onload = onload;
-		$scope.wagonImage1.src = 'img/wagon1.gif';
+		$scope.wagonImage1.src = 'img/handcart1.gif';
 		
 		$scope.wagonImage2 = new Image;
 		$scope.wagonImage2.crossOrigin = '';
 		//$scope.wagonImage2.onload = onload;
-		$scope.wagonImage2.src = 'img/wagon2.gif';
+		$scope.wagonImage2.src = 'img/handcart2.gif';
 		
 		$scope.emigrationCanyonImage = new Image;
 		$scope.emigrationCanyonImage.crossOrigin = '';
@@ -99,9 +99,16 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		$scope.emigrationCanyonImage.src = 'img/emigration-canyon.gif';
 	}
 	
+	$scope.drawLandscape = function() {
+		$scope.context.penColor(null);
+		$scope.context.fillColor(38, 195,18);
+		$scope.context.rect(0, 67, 280, 20);
+	}
+	
 	$scope.renderWalkingScreen = function() {
 		$scope.drawTextAtLine('The Mormon Trail', 1);
 		$scope.drawTextAtLine('Miles traveled: ' + $scope.odometer + ' miles', 21);
+		$scope.drawLandscape();
 		$scope.drawWagon();		
 	}
 	
@@ -111,6 +118,9 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		$scope.context
 			.drawImage(image, 0, 0, 280, 160, 'palette-fs');
 		$scope.drawTextAtLine('This is the place!', 21);
+		
+		$scope.drawTextAtLine('Congratulations!  You have', 10);
+		$scope.drawTextAtLine('made it to the Salt Lake valley.', 10);		
 	}
 	
 	$scope.render = function() {
@@ -120,6 +130,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 			case 'TRAVEL':
 				$scope.renderWalkingScreen();
 				break;
+			case 'VICTORY':
 			default:
 				$scope.renderScenery();
 				break;
