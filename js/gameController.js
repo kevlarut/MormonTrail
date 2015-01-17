@@ -4,12 +4,24 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
  
 	$scope.lastUpdated = new Date();
 
+	$scope.animating = true;
 	$scope.animationIndex = 0;
 	$scope.context = null;
 	$scope.canvasWidth = 0;	
+
+	$scope.BLACK_INDEX = 0;
+	$scope.WHITE_INDEX = 15;
 	
+	$scope.date = 'July 24, 1847';
+	$scope.weather = 'warm';
+	$scope.health = 'good';
+	$scope.food = 0;
+	$scope.modal = null;
 	$scope.odometer = 0;		
 	$scope.screen = 'TRAVEL';
+	
+	$scope.inputCallback = null;
+	$scope.inputBuffer = '';
 	
 	$scope.wagonImage1 = null;
 	$scope.wagonImage2 = null;
@@ -24,20 +36,28 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 	
 	$scope.landmarks = [
 		{
-			title: 'Winter Quarters',
+			name: 'Sugar Creek',
+			miles: 7
+		},		
+		{
+			name: 'Winter Quarters',
 			miles: 266
 		},		
 		{
-			title: 'Fort Laramie',
+			name: 'Fort Laramie',
 			miles: 788
 		},		
 		{
-			title: 'Martin\'s Cove',
+			name: 'Martin\'s Cove',
 			miles: 993
 		},		
 		{
-			title: 'Echo Canyon',
+			name: 'Echo Canyon',
 			miles: 1246
+		},		
+		{
+			name: 'Salt Lake Valley',
+			miles: 1297
 		}
 	];
 		
@@ -47,14 +67,26 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 			.bgIndex(0);
 	}
 	
-    $scope.drawTextAtLine = function (text, line) {
-		var ctx = $scope.context;
-		ctx	
-			.fillIndex(0)
-			.font('c64')
-			.textAlign('center')
-			.penColor(255,255,255)
-			.text(text, $scope.canvasWidth, 8*line);
+	$scope.drawText = function(text, options) {
+		var backgroundColorIndex = options.background || $scope.BLACK_INDEX;
+		var font = 'c64';
+		var textAlign = options.textAlign || 'center';
+		var foregroundColorIndex = (options.foreground || $scope.WHITE_INDEX);
+		var characterHeight = 8;
+		var line = options.line || 0;
+		var y = characterHeight * line;
+		
+		$scope.context
+			.fillIndex(backgroundColorIndex)
+			.font(font)
+			.textAlign(textAlign)
+			.penIndex(foregroundColorIndex)
+			.text(text, $scope.canvasWidth, y);
+			
+	}
+	
+    $scope.drawTextAtLine = function (text, line) {	
+		$scope.drawText(text, { line: line });
     };
 		
 	$scope.drawWagon = function() {	
@@ -124,22 +156,53 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		$scope.context.rect(0, 67, 280, 20);
 	}
 	
-	$scope.milesToNextLandmark = function() {
+	$scope.getNextLandmark = function() {
 		for (var i = 0; i < $scope.landmarks.length; i++) {
 			var landmark = $scope.landmarks[i];
-			if ($scope.odometer < landmark.miles) {
-				return landmark.miles - $scope.odometer;
+			if ($scope.odometer <= landmark.miles) {
+				return landmark;
 			}
 		}
+		return null;
+	}
+	
+	$scope.milesToNextLandmark = function() {
+		var landmark = $scope.getNextLandmark();
+		if (landmark != null) {
+			return landmark.miles - $scope.odometer;
+		}	
 		return 0;
 	}
 	
 	$scope.renderWalkingScreen = function() {
+	
+		$scope.context.penColor(null);
+		$scope.context.fillColor(255, 255, 255);
+		$scope.context.rect(0, 88, 280, 190);
+		
 		$scope.drawTextAtLine('The Mormon Trail', 1);
-		$scope.drawTextAtLine('Next landmark: ' + $scope.milesToNextLandmark() + ' miles', 20);
-		$scope.drawTextAtLine('Miles traveled: ' + $scope.odometer + ' miles', 21);
+		
+		var whiteLinesToDraw = [];
+		whiteLinesToDraw.push({ label: 'Date: ', value: $scope.date});
+		whiteLinesToDraw.push({ label: 'Weather: ', value: $scope.weather});
+		whiteLinesToDraw.push({ label: 'Health: ', value: $scope.health});
+		whiteLinesToDraw.push({ label: 'Food: ', value: $scope.food + ' pounds'});
+		whiteLinesToDraw.push({ label: 'Next landmark: ', value: $scope.milesToNextLandmark() + ' miles'});
+		whiteLinesToDraw.push({ label: 'Miles traveled: ', value: $scope.odometer + ' miles'});
+		
+		for (var i = 0; i < whiteLinesToDraw.length; i++) {
+			var line = whiteLinesToDraw[i];
+			$scope.drawText(line.label, {background: $scope.WHITE_INDEX, foreground: $scope.BLACK_INDEX -1, line: 16 + i, textAlign: 'right' });
+			$scope.drawText(line.value, {background: $scope.WHITE_INDEX, foreground: $scope.BLACK_INDEX -1, line: 16 + i, textAlign: 'left' });
+		}
+		
 		$scope.drawLandscape();
-		$scope.drawWagon();		
+		$scope.drawWagon();
+	}
+	
+	$scope.showSceneForCurrentLandmark = function() {
+		console.log('ERROR: showSceneForCurrentLandmark is NotImplemented!');
+		$scope.returnToWalking();
 	}
 	
 	$scope.renderScenery = function() {
@@ -149,8 +212,23 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 			.drawImage(image, 0, 0, 280, 160, 'palette-fs');
 		$scope.drawTextAtLine('This is the place!', 21);
 		
-		$scope.drawTextAtLine('Congratulations!  You have', 9);
-		$scope.drawTextAtLine('made it to the Salt Lake valley.', 10);		
+		$scope.modal = 'Congratulations!  You have made it to the Salt Lake valley.';
+	}
+	
+	$scope.wordWrap = function(text) {
+		
+		var width = 25;
+		
+		if (!text) { 
+			return text; 
+		}
+	 
+		var regex = '.{1,' + width + '}(\\s|$)|\\S+?(\\s|$)';
+	 
+		var lines = text.match( RegExp(regex, 'g') );
+		
+		return lines;
+		
 	}
 	
 	$scope.render = function() {
@@ -164,6 +242,19 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 			default:
 				$scope.renderScenery();
 				break;
+		}
+		
+		if ($scope.modal != null) {		
+			var text = $scope.modal;
+			var lines = $scope.wordWrap(text);
+			
+			$scope.context.penColor(255,255,255);
+			$scope.context.fillColor(0,0,0);
+			$scope.context.rect(35, 75, 210, 10 + (8*lines.length));
+		
+			for (var i = 0; i < lines.length; i++) {
+				$scope.drawTextAtLine(lines[i], 10+i);					
+			}
 		}
 	}
 	
@@ -193,6 +284,34 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		}		
 	}
 	
+	$scope.returnToWalking = function() {
+		$scope.animating = true;
+		$scope.modal = null;
+		$scope.odometer++;
+	}
+	
+	$scope.handleInputForViewLandmarkOrReturnToTravel = function(input) {
+		console.log('handleInputForViewLandmarkOrReturnToTravel was called with input ' + input);
+		
+		if (input == 'Y' || input == 'YES') {
+			$scope.showSceneForCurrentLandmark();
+		}
+		else {
+			$scope.returnToWalking();
+		}
+	}
+	
+	$scope.keyup = function(event) {
+		var KEYCODE_ENTER = 13;
+		if (event.keyCode == KEYCODE_ENTER) {
+			$scope[$scope.inputCallback]($scope.inputBuffer);
+			$scope.inputBuffer = '';
+		}
+		else {
+			$scope.inputBuffer += String.fromCharCode(event.keyCode);
+		}
+	}
+	
 	$scope.update = function() {
 		var framesPerSecond = 2;
 		
@@ -201,22 +320,37 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 
 		if ($scope.screen == 'TRAVEL') {
 			$scope.ensureThatASongIsPlaying();
-			$scope.odometer += 10;
 		
-			if ($scope.odometer >= 1300) {
-				$scope.screen = 'VICTORY';
-				$scope.stopAllAudio();
-				$scope.playAudio('audio/come-come-ye-saints.mp3');
+			var landmark = $scope.getNextLandmark();
+			if ($scope.odometer >= landmark.miles) {
+				$scope.odometer = landmark.miles;
+	
+				if (landmark.name == 'Salt Lake Valley') {
+					$scope.screen = 'VICTORY';
+					$scope.stopAllAudio();
+					$scope.playAudio('audio/come-come-ye-saints.mp3');
+				}
+				else {
+					$scope.modal = 'You are now at ' + landmark.name + '. Would you like to look around?';
+					$scope.inputCallback = 'handleInputForViewLandmarkOrReturnToTravel';
+					$scope.animating = false;
+				}
+			}
+			else {
+				var distanceToNextLandmark = landmark.miles - $scope.odometer;
+				$scope.odometer += distanceToNextLandmark < 10 ? distanceToNextLandmark : 10;
 			}
 		}
 		
 		$scope.render();
 		
-		if ($scope.animationIndex == 0) {
-			$scope.animationIndex = 1;
-		}
-		else {
-			$scope.animationIndex = 0;
+		if ($scope.animating) {
+			if ($scope.animationIndex == 0) {
+				$scope.animationIndex = 1;
+			}
+			else {
+				$scope.animationIndex = 0;
+			}
 		}
 		
 		$scope.lastUpdated = now;		

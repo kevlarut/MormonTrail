@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html>
+<html ng-app="gameApp">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>The Mormon Trail</title>
@@ -21,10 +21,10 @@
 	<script src="js/gameController.js"></script>
 	
 </head>
-<body>
+<body ng-controller="gameController" ng-keyup="keyup($event)">
 
-	<div ng-app="gameApp">
-        <div ng-controller="gameController">
+	<div>
+        <div>
             <canvas id="game" width="840" height="576" data-width="280" data-height="192">
                 <h1>Sorry, this browser does not have support for needed canvas / HTML5</h1>
             </canvas>
