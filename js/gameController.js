@@ -21,6 +21,25 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		{ 'src': 'audio/the-oxcart.mp3' },
 		{ 'src': 'audio/to-be-a-pioneer.mp3' }
 	];
+	
+	$scope.landmarks = [
+		{
+			title: 'Winter Quarters',
+			miles: 266
+		},		
+		{
+			title: 'Fort Laramie',
+			miles: 788
+		},		
+		{
+			title: 'Martin\'s Cove',
+			miles: 993
+		},		
+		{
+			title: 'Echo Canyon',
+			miles: 1246
+		}
+	];
 		
 	$scope.clearCanvas = function() {
 		$scope.context
@@ -105,8 +124,19 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		$scope.context.rect(0, 67, 280, 20);
 	}
 	
+	$scope.milesToNextLandmark = function() {
+		for (var i = 0; i < $scope.landmarks.length; i++) {
+			var landmark = $scope.landmarks[i];
+			if ($scope.odometer < landmark.miles) {
+				return landmark.miles - $scope.odometer;
+			}
+		}
+		return 0;
+	}
+	
 	$scope.renderWalkingScreen = function() {
 		$scope.drawTextAtLine('The Mormon Trail', 1);
+		$scope.drawTextAtLine('Next landmark: ' + $scope.milesToNextLandmark() + ' miles', 20);
 		$scope.drawTextAtLine('Miles traveled: ' + $scope.odometer + ' miles', 21);
 		$scope.drawLandscape();
 		$scope.drawWagon();		
@@ -119,7 +149,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 			.drawImage(image, 0, 0, 280, 160, 'palette-fs');
 		$scope.drawTextAtLine('This is the place!', 21);
 		
-		$scope.drawTextAtLine('Congratulations!  You have', 10);
+		$scope.drawTextAtLine('Congratulations!  You have', 9);
 		$scope.drawTextAtLine('made it to the Salt Lake valley.', 10);		
 	}
 	
