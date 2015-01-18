@@ -25,7 +25,6 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 	
 	$scope.wagonImage1 = null;
 	$scope.wagonImage2 = null;
-	$scope.emigrationCanyonImage = null;
 	$scope.audio = [
 		{ 'src': 'audio/come-come-ye-saints.mp3' },
 		{ 'src': 'audio/pioneer-children-sang-as-they-walked.mp3' },
@@ -37,27 +36,43 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 	$scope.landmarks = [
 		{
 			name: 'Sugar Creek',
-			miles: 7
+			miles: 7,
+			src: 'img/sugar-creek.gif'
 		},		
 		{
 			name: 'Winter Quarters',
-			miles: 266
+			miles: 266,
+			src: 'img/winter-quarters.gif'
+		},		
+		{
+			name: 'Chimney Rock',
+			miles: 718,
+			src: 'img/chimney-rock.gif'
 		},		
 		{
 			name: 'Fort Laramie',
-			miles: 788
+			miles: 788,
+			src: 'img/fort-laramie.gif'
 		},		
 		{
 			name: 'Martin\'s Cove',
-			miles: 993
+			miles: 993,
+			src: 'img/martins-cove.gif'
 		},		
 		{
 			name: 'Echo Canyon',
-			miles: 1246
+			miles: 1246,
+			src: 'img/echo-canyon.gif'
+		},		
+		{
+			name: 'Emigration Canyon',
+			miles: 1283,
+			src: 'img/emigration-canyon.gif'
 		},		
 		{
 			name: 'Salt Lake Valley',
-			miles: 1297
+			miles: 1297,
+			src: 'img/salt-lake-valley.gif'
 		}
 	];
 		
@@ -133,6 +148,12 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		}
 	}
 	
+	$scope.loadImage = function(src) {
+		var image = new Image;
+		image.src = src;
+		return image;
+	}
+	
 	$scope.loadImages = function(onload) {
 		$scope.wagonImage1 = new Image;
 		$scope.wagonImage1.crossOrigin = '';
@@ -141,19 +162,22 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		
 		$scope.wagonImage2 = new Image;
 		$scope.wagonImage2.crossOrigin = '';
-		//$scope.wagonImage2.onload = onload;
+		$scope.wagonImage2.onload = onload;
 		$scope.wagonImage2.src = 'img/handcart2.gif';
 		
-		$scope.emigrationCanyonImage = new Image;
-		$scope.emigrationCanyonImage.crossOrigin = '';
-		$scope.emigrationCanyonImage.onload = onload;
-		$scope.emigrationCanyonImage.src = 'img/emigration-canyon.gif';
-	}
-	
-	$scope.drawLandscape = function() {
-		$scope.context.penColor(null);
-		$scope.context.fillColor(38, 195,18);
-		$scope.context.rect(0, 67, 280, 20);
+		$scope.grassImage = $scope.loadImage('img/grass.gif');
+		$scope.plainsBackgroundImage = $scope.loadImage('img/plains-background.gif');
+		
+		$scope.context.drawImage($scope.grassImage, 0, 88);
+		$scope.context.drawImage($scope.plainsBackgroundImage, 0, 0);
+		
+		for (var i = 0; i < $scope.landmarks.length; i++) {
+			var landmark = $scope.landmarks[i];
+			var image = new Image;
+			image.onload = null;
+			image.src = landmark.src;			
+			landmark.image = image;
+		}
 	}
 	
 	$scope.getNextLandmark = function() {
@@ -174,10 +198,17 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		return 0;
 	}
 	
+	$scope.drawPlainsBackground = function() {				
+		$scope.context.drawImage($scope.grassImage, 0, 67);
+		$scope.context.drawImage($scope.plainsBackgroundImage, 0, 20);
+	}
+	
 	$scope.renderWalkingScreen = function() {
 	
 		$scope.context.penColor(null);
 		$scope.context.fillColor(255, 255, 255);
+		
+		$scope.drawPlainsBackground();
 		$scope.context.rect(0, 88, 280, 190);
 		
 		$scope.drawTextAtLine('The Mormon Trail', 1);
@@ -196,18 +227,30 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 			$scope.drawText(line.value, {background: $scope.WHITE_INDEX, foreground: $scope.BLACK_INDEX -1, line: 16 + i, textAlign: 'left' });
 		}
 		
-		$scope.drawLandscape();
 		$scope.drawWagon();
 	}
 	
 	$scope.showSceneForCurrentLandmark = function() {
-		console.log('ERROR: showSceneForCurrentLandmark is NotImplemented!');
-		$scope.returnToWalking();
+		$scope.modal = null;
+		$scope.screen = 'LANDMARK';
+		$scope.inputCallback = 'returnToWalking';
 	}
 	
-	$scope.renderScenery = function() {
+	$scope.renderLandmarkScreen = function() {
 	
-		var image = $scope.emigrationCanyonImage;
+		var landmark = $scope.getNextLandmark();
+	
+		$scope.context
+			.drawImage(landmark.image, 0, 0, 280, 160, 'palette-fs');
+		$scope.drawTextAtLine(landmark.name, 21);
+		$scope.drawTextAtLine($scope.date, 22);
+		
+		$scope.drawText('Press ENTER to continue', {background: $scope.WHITE_INDEX, foreground: $scope.BLACK_INDEX -1, line: 23 });
+	}
+	
+	$scope.renderVictoryScreen = function() {
+	
+		var image = $scope.landmarks[$scope.landmarks.length - 1].image;
 		$scope.context
 			.drawImage(image, 0, 0, 280, 160, 'palette-fs');
 		$scope.drawTextAtLine('This is the place!', 21);
@@ -238,9 +281,12 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 			case 'TRAVEL':
 				$scope.renderWalkingScreen();
 				break;
+			case 'LANDMARK':
+				$scope.renderLandmarkScreen();
+				break;
 			case 'VICTORY':
 			default:
-				$scope.renderScenery();
+				$scope.renderVictoryScreen();
 				break;
 		}
 		
@@ -285,6 +331,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 	}
 	
 	$scope.returnToWalking = function() {
+		$scope.screen = 'TRAVEL';
 		$scope.animating = true;
 		$scope.modal = null;
 		$scope.odometer++;
