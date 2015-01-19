@@ -1,6 +1,6 @@
 var gameApp = angular.module('gameApp');
 
-gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $timeout) {
+gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', function($scope, $timeout, landmarkData) {
  
 	$scope.lastUpdated = new Date();
 
@@ -23,6 +23,14 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 	$scope.inputCallback = null;
 	$scope.inputBuffer = '';
 	
+	$scope.party = [
+		{ name: 'Brigham' },
+		{ name: 'Mary' },
+		{ name: 'Joseph' },
+		{ name: 'Ezekiel' },
+		{ name: 'Emma' }
+	];
+	
 	$scope.wagonImage1 = null;
 	$scope.wagonImage2 = null;
 	$scope.audio = [
@@ -32,50 +40,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		{ 'src': 'audio/the-oxcart.mp3' },
 		{ 'src': 'audio/to-be-a-pioneer.mp3' }
 	];
-	
-	$scope.landmarks = [
-		{
-			name: 'Sugar Creek',
-			miles: 7,
-			src: 'img/sugar-creek.gif'
-		},		
-		{
-			name: 'Winter Quarters',
-			miles: 266,
-			src: 'img/winter-quarters.gif'
-		},		
-		{
-			name: 'Chimney Rock',
-			miles: 718,
-			src: 'img/chimney-rock.gif'
-		},		
-		{
-			name: 'Fort Laramie',
-			miles: 788,
-			src: 'img/fort-laramie.gif'
-		},		
-		{
-			name: 'Martin\'s Cove',
-			miles: 993,
-			src: 'img/martins-cove.gif'
-		},		
-		{
-			name: 'Echo Canyon',
-			miles: 1246,
-			src: 'img/echo-canyon.gif'
-		},		
-		{
-			name: 'Emigration Canyon',
-			miles: 1283,
-			src: 'img/emigration-canyon.gif'
-		},		
-		{
-			name: 'Salt Lake Valley',
-			miles: 1297,
-			src: 'img/salt-lake-valley.gif'
-		}
-	];
-		
+			
 	$scope.clearCanvas = function() {
 		$scope.context
 			.clear()
@@ -171,8 +136,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		$scope.context.drawImage($scope.grassImage, 0, 88);
 		$scope.context.drawImage($scope.plainsBackgroundImage, 0, 0);
 		
-		for (var i = 0; i < $scope.landmarks.length; i++) {
-			var landmark = $scope.landmarks[i];
+		for (var i = 0; i < landmarkData.landmarks.length; i++) {
+			var landmark = landmarkData.landmarks[i];
 			var image = new Image;
 			image.onload = null;
 			image.src = landmark.src;			
@@ -181,8 +146,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 	}
 	
 	$scope.getNextLandmark = function() {
-		for (var i = 0; i < $scope.landmarks.length; i++) {
-			var landmark = $scope.landmarks[i];
+		for (var i = 0; i < landmarkData.landmarks.length; i++) {
+			var landmark = landmarkData.landmarks[i];
 			if ($scope.odometer <= landmark.miles) {
 				return landmark;
 			}
@@ -250,7 +215,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 	
 	$scope.renderVictoryScreen = function() {
 	
-		var image = $scope.landmarks[$scope.landmarks.length - 1].image;
+		var image = landmarkData.landmarks[landmarkData.landmarks.length - 1].image;
 		$scope.context
 			.drawImage(image, 0, 0, 280, 160, 'palette-fs');
 		$scope.drawTextAtLine('This is the place!', 21);
@@ -304,8 +269,12 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		}
 	}
 	
+	$scope.random = function(min, max) {
+		return Math.floor(Math.random() * (max - min + 1) + min);
+	}
+	
 	$scope.playARandomTrailSong = function() {
-		var randomIndexExceptVictorySong = Math.floor(Math.random() * ($scope.audio.length - 1)) + 1;
+		var randomIndexExceptVictorySong = $scope.random(1, $scope.audio.length - 1);
 		$scope.playAudio($scope.audio[randomIndexExceptVictorySong].src);
 	}
 	
@@ -359,6 +328,30 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		}
 	}
 	
+	$scope.haltForInput = function(callback) {		
+		$scope.inputCallback = callback;
+		$scope.animating = false;
+	}
+	
+	$scope.giveSomeoneCholera = function() {
+		var index = $scope.random(0, $scope.party.length - 1);
+		var person = $scope.party[index];
+		if (typeof person.condition === 'undefined' || person.condition === null) {
+			person.condition = 'cholera';
+			$scope.modal = person.name + ' has cholera.';
+			$scope.haltForInput('returnToWalking');
+		}
+	}
+	
+	$scope.considerSpawningARandomEvent = function() {
+		var roll = $scope.random(1, 100);
+		switch (roll) {
+			case 1: 
+				$scope.giveSomeoneCholera();
+				break;
+		}
+	}
+	
 	$scope.update = function() {
 		var framesPerSecond = 2;
 		
@@ -368,24 +361,28 @@ gameApp.controller('gameController', ['$scope', '$timeout', function($scope, $ti
 		if ($scope.screen == 'TRAVEL') {
 			$scope.ensureThatASongIsPlaying();
 		
-			var landmark = $scope.getNextLandmark();
-			if ($scope.odometer >= landmark.miles) {
-				$scope.odometer = landmark.miles;
-	
-				if (landmark.name == 'Salt Lake Valley') {
-					$scope.screen = 'VICTORY';
-					$scope.stopAllAudio();
-					$scope.playAudio('audio/come-come-ye-saints.mp3');
+			if ($scope.animating) {
+				var landmark = $scope.getNextLandmark();
+				if ($scope.odometer >= landmark.miles) {
+					$scope.odometer = landmark.miles;
+		
+					if (landmark.name == 'Salt Lake Valley') {
+						$scope.screen = 'VICTORY';
+						$scope.stopAllAudio();
+						$scope.playAudio('audio/come-come-ye-saints.mp3');
+					}
+					else {
+						$scope.modal = 'You are now at ' + landmark.name + '. Would you like to look around?';
+						$scope.haltForInput('handleInputForViewLandmarkOrReturnToTravel');
+					}
 				}
 				else {
-					$scope.modal = 'You are now at ' + landmark.name + '. Would you like to look around?';
-					$scope.inputCallback = 'handleInputForViewLandmarkOrReturnToTravel';
-					$scope.animating = false;
+				
+					$scope.considerSpawningARandomEvent();
+				
+					var distanceToNextLandmark = landmark.miles - $scope.odometer;
+					$scope.odometer += distanceToNextLandmark < 10 ? distanceToNextLandmark : 10;
 				}
-			}
-			else {
-				var distanceToNextLandmark = landmark.miles - $scope.odometer;
-				$scope.odometer += distanceToNextLandmark < 10 ? distanceToNextLandmark : 10;
 			}
 		}
 		
