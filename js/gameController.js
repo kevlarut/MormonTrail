@@ -1,10 +1,9 @@
 var gameApp = angular.module('gameApp');
 
-gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', function($scope, $timeout, landmarkData) {
+gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', 'partyData', 'userInterfaceData', 'healthService', 'randomService', 'userInterfaceService', function($scope, $timeout, landmarkData, partyData, userInterfaceData, healthService, randomService, userInterfaceService) {
  
 	$scope.lastUpdated = new Date();
 
-	$scope.animating = true;
 	$scope.animationIndex = 0;
 	$scope.context = null;
 	$scope.canvasWidth = 0;	
@@ -14,21 +13,16 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 	
 	$scope.date = new Date(1847, 4, 5);
 	$scope.weather = 'warm';
-	$scope.food = 0;
-	$scope.modal = null;
+	$scope.food = 1000;
 	$scope.roadometer = 0;		
+	
+	// 1lbs per day is bare bones
+	// 2lbs per day is meager		
+	// 3lbs per day is filling
+	$scope.dailyRation = 3;
 	$scope.screen = 'TRAVEL';
 	
-	$scope.inputCallback = null;
 	$scope.inputBuffer = '';
-	
-	$scope.party = [
-		{ name: 'Brigham' },
-		{ name: 'Mary' },
-		{ name: 'Joseph' },
-		{ name: 'Ezekiel' },
-		{ name: 'Emma' }
-	];
 	
 	$scope.wagonImage1 = null;
 	$scope.wagonImage2 = null;
@@ -44,36 +38,6 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 		$scope.context
 			.clear()
 			.bgIndex(0);
-	}
-	
-	$scope.getHealth = function() {
-		var partySize = $scope.party.length;
-		var sickMembers = 0;
-		for (var i = 0; i < partySize; i++) {
-			var person = $scope.party[i];
-			if (person.disease) {
-				sickMembers++;
-			}
-		}
-		
-		var healthyMembers = partySize - sickMembers;		
-		switch (healthyMembers) {
-			case 1:
-				return 'very poor';
-				break;
-			case 2:
-				return 'poor';
-				break;
-			case 3:
-				return 'fair';
-				break;
-			case 4:
-				return 'good';
-				break;
-			default:
-				return 'very good';
-				break;
-		}
 	}
 	
 	$scope.drawText = function(text, options) {
@@ -208,10 +172,11 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 		$scope.drawTextAtLine('The Mormon Trail', 1);
 		
 		var date = $scope.date.toDateString();
+		var health = healthService.getHealth();
 		var whiteLinesToDraw = [];
 		whiteLinesToDraw.push({ label: 'Date: ', value: date});
 		whiteLinesToDraw.push({ label: 'Weather: ', value: $scope.weather});
-		whiteLinesToDraw.push({ label: 'Health: ', value: $scope.getHealth()});
+		whiteLinesToDraw.push({ label: 'Health: ', value: health});
 		whiteLinesToDraw.push({ label: 'Food: ', value: $scope.food + ' pounds'});
 		whiteLinesToDraw.push({ label: 'Next landmark: ', value: $scope.milesToNextLandmark() + ' miles'});
 		whiteLinesToDraw.push({ label: 'Miles traveled: ', value: $scope.roadometer + ' miles'});
@@ -226,9 +191,9 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 	}
 	
 	$scope.showSceneForCurrentLandmark = function() {
-		$scope.modal = null;
+		userInterfaceData.modal = null;
 		$scope.screen = 'LANDMARK';
-		$scope.inputCallback = 'returnToWalking';
+		userInterfaceData.inputCallback = 'returnToWalking';
 	}
 	
 	$scope.renderLandmarkScreen = function() {
@@ -250,7 +215,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 			.drawImage(image, 0, 0, 280, 160, 'palette-fs');
 		$scope.drawTextAtLine('This is the place!', 21);
 		
-		$scope.modal = 'Congratulations!  You have made it to the Salt Lake valley.';
+		userInterfaceData.modal = 'Congratulations!  You have made it to the Salt Lake valley.';
 	}
 	
 	$scope.wordWrap = function(text) {
@@ -285,8 +250,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 				break;
 		}
 		
-		if ($scope.modal != null) {		
-			var text = $scope.modal;
+		if (userInterfaceData.modal != null) {		
+			var text = userInterfaceData.modal;
 			var lines = $scope.wordWrap(text);
 			
 			$scope.context.penColor(255,255,255);
@@ -299,12 +264,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 		}
 	}
 	
-	$scope.random = function(min, max) {
-		return Math.floor(Math.random() * (max - min + 1) + min);
-	}
-	
 	$scope.playARandomTrailSong = function() {
-		var randomIndexExceptVictorySong = $scope.random(1, $scope.audio.length - 1);
+		var randomIndexExceptVictorySong = randomService.random(1, $scope.audio.length - 1);
 		$scope.playAudio($scope.audio[randomIndexExceptVictorySong].src);
 	}
 	
@@ -331,8 +292,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 	
 	$scope.returnToWalking = function() {
 		$scope.screen = 'TRAVEL';
-		$scope.animating = true;
-		$scope.modal = null;
+		userInterfaceData.animating = true;
+		userInterfaceData.modal = null;
 		$scope.roadometer++;
 	}
 	
@@ -350,7 +311,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 	$scope.keyup = function(event) {
 		var KEYCODE_ENTER = 13;
 		if (event.keyCode == KEYCODE_ENTER) {
-			$scope[$scope.inputCallback]($scope.inputBuffer);
+			$scope[userInterfaceData.inputCallback]($scope.inputBuffer);
 			$scope.inputBuffer = '';
 		}
 		else {
@@ -358,37 +319,54 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 		}
 	}
 	
-	$scope.haltForInput = function(callback) {		
-		$scope.inputCallback = callback;
-		$scope.animating = false;
-	}
-	
-	$scope.inflictADiseaseOnSomeone = function(disease) {
-		var index = $scope.random(0, $scope.party.length - 1);
-		var person = $scope.party[index];
-		if (typeof person.disease === 'undefined' || person.disease === null) {
-			person.disease = disease;
-			$scope.modal = person.name + ' has ' + disease + '.';
-			$scope.haltForInput('returnToWalking');
-		}
-	}
-	
 	$scope.considerSpawningARandomEvent = function() {
-		var roll = $scope.random(1, 100);
+		var roll = randomService.random(1, 100);
 		switch (roll) {
 			case 1: 
-				$scope.inflictADiseaseOnSomeone('cholera');
+				healthService.inflictADiseaseOnSomeone('cholera');
 				break;
 			case 2:
+				healthService.inflictADiseaseOnSomeone('dysentery');
+				break;
 			case 3:
-				$scope.inflictADiseaseOnSomeone('mountain fever');
+			case 4:
+				healthService.inflictADiseaseOnSomeone('mountain fever');
+				break;
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+				healthService.healSomeone();
 				break;
 		}
 	}
+	
+	$scope.starveSomeone = function() {
+		console.log("ERROR: starveSomeone is not yet implemented.");
+	}
+	
+	$scope.eatFood = function() {
+		
+		var livingMembersOfParty = partyData.party.length;
+		for (var i = 0; i < partyData.party.length; i++) {
+			var person = partyData.party[i];
+			if (person.isDead) {
+				livingMembersOfParty--;
+			}
+		}
+		
+		var dailyNutritionRequirement = livingMembersOfParty * $scope.dailyRation;
+		$scope.food -= dailyNutritionRequirement;
+		if ($scope.food < 0) {
+			$scope.starveSomeone();
+			$scope.food = 0;			
+		}
+	} 
 	
 	$scope.advanceTheDay = function() {		
 		$scope.date.setTime( $scope.date.getTime() + 1 * 86400000 );
 		$scope.considerSpawningARandomEvent();
+		$scope.eatFood();
 	}
 	
 	$scope.update = function() {
@@ -400,7 +378,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 		if ($scope.screen == 'TRAVEL') {
 			$scope.ensureThatASongIsPlaying();
 		
-			if ($scope.animating) {
+			if (userInterfaceData.animating) {
 				var landmark = $scope.getNextLandmark();
 				if ($scope.roadometer >= landmark.miles) {
 					$scope.roadometer = landmark.miles;
@@ -411,8 +389,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 						$scope.playAudio('audio/come-come-ye-saints.mp3');
 					}
 					else {
-						$scope.modal = 'You are now at ' + landmark.name + '. Would you like to look around?';
-						$scope.haltForInput('handleInputForViewLandmarkOrReturnToTravel');
+						userInterfaceData.modal = 'You are now at ' + landmark.name + '. Would you like to look around?';
+						userInterfaceService.haltForInput('handleInputForViewLandmarkOrReturnToTravel');
 					}
 				}
 				else {
@@ -427,7 +405,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', func
 		
 		$scope.render();
 		
-		if ($scope.animating) {
+		if (userInterfaceData.animating) {
 			if ($scope.animationIndex == 0) {
 				$scope.animationIndex = 1;
 			}
