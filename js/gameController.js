@@ -1,6 +1,6 @@
 var gameApp = angular.module('gameApp');
 
-gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', 'partyData', 'userInterfaceData', 'healthService', 'randomService', 'userInterfaceService', function($scope, $timeout, landmarkData, partyData, userInterfaceData, healthService, randomService, userInterfaceService) {
+gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landmarkData', 'partyData', 'userInterfaceData', 'healthService', 'randomService', 'userInterfaceService', function($scope, $timeout, audioData, landmarkData, partyData, userInterfaceData, healthService, randomService, userInterfaceService) {
  
 	$scope.lastUpdated = new Date();
 
@@ -25,14 +25,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', 'par
 	$scope.inputBuffer = '';
 	
 	$scope.wagonImage1 = null;
-	$scope.wagonImage2 = null;
-	$scope.audio = [
-		{ 'src': 'audio/come-come-ye-saints.mp3' },
-		{ 'src': 'audio/pioneer-children-sang-as-they-walked.mp3' },
-		{ 'src': 'audio/the-handcart-song.mp3' },
-		{ 'src': 'audio/the-oxcart.mp3' },
-		{ 'src': 'audio/to-be-a-pioneer.mp3' }
-	];
+	$scope.wagonImage2 = null;	
 
 	$scope.clearCanvas = function() {
 		$scope.context
@@ -72,8 +65,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', 'par
 	}
 	
 	$scope.getAudioBySrc = function(src) {
-		for (var i = 0; i < $scope.audio.length; i++) {
-			var song = $scope.audio[i];
+		for (var i = 0; i < audioData.audio.length; i++) {
+			var song = audioData.audio[i];
 			if (song.src === src) {
 				return song;
 			}
@@ -93,8 +86,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', 'par
 	}
 	
 	$scope.loadAudio = function() {	
-		for (var i = 0; i < $scope.audio.length; i++) {
-			var song = $scope.audio[i];
+		for (var i = 0; i < audioData.audio.length; i++) {
+			var song = audioData.audio[i];
 			var element = document.createElement('audio');
 			element.preload = 'auto';
 			element.audioId = song.src;
@@ -265,13 +258,13 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', 'par
 	}
 	
 	$scope.playARandomTrailSong = function() {
-		var randomIndexExceptVictorySong = randomService.random(1, $scope.audio.length - 1);
-		$scope.playAudio($scope.audio[randomIndexExceptVictorySong].src);
+		var randomIndexExceptVictorySong = randomService.random(1, audioData.audio.length - 1);
+		$scope.playAudio(audioData.audio[randomIndexExceptVictorySong].src);
 	}
 	
 	$scope.ensureThatASongIsPlaying = function() {
-		for (var i = 0; i < $scope.audio.length; i++) {
-			var song = $scope.audio[i];			
+		for (var i = 0; i < audioData.audio.length; i++) {
+			var song = audioData.audio[i];			
 			if (typeof song.element != 'undefined' && song.element.currentTime != 0 && song.element.currentTime < song.element.duration) {
 				return;
 			}
@@ -281,8 +274,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'landmarkData', 'par
 	}
 	
 	$scope.stopAllAudio = function() {
-		for (var i = 0; i < $scope.audio.length; i++) {
-			var song = $scope.audio[i];
+		for (var i = 0; i < audioData.audio.length; i++) {
+			var song = audioData.audio[i];
 			if (typeof song.element != 'undefined') {
 				song.element.pause();
 				song.element.currentTime = 0;
