@@ -1,16 +1,11 @@
 var gameApp = angular.module('gameApp');
 
-gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landmarkData', 'partyData', 'userInterfaceData', 'healthService', 'randomService', 'userInterfaceService', function($scope, $timeout, audioData, landmarkData, partyData, userInterfaceData, healthService, randomService, userInterfaceService) {
+gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landmarkData', 'partyData', 'userInterfaceData', 'healthService', 'randomService', 'userInterfaceService', 'deathService', 'imageData', function($scope, $timeout, audioData, landmarkData, partyData, userInterfaceData, healthService, randomService, userInterfaceService, deathService, imageData) {
  
 	$scope.lastUpdated = new Date();
 
 	$scope.animationIndex = 0;
-	$scope.context = null;
-	$scope.canvasWidth = 0;	
-
-	$scope.BLACK_INDEX = 0;
-	$scope.WHITE_INDEX = 15;
-	
+		
 	$scope.date = new Date(1847, 4, 5);
 	$scope.weather = 'warm';
 	$scope.food = 1000;
@@ -20,7 +15,6 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 	// 2lbs per day is meager		
 	// 3lbs per day is filling
 	$scope.dailyRation = 3;
-	$scope.screen = 'TRAVEL';
 	
 	$scope.inputBuffer = '';
 	
@@ -28,39 +22,17 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 	$scope.wagonImage2 = null;	
 
 	$scope.clearCanvas = function() {
-		$scope.context
+		userInterfaceData.context
 			.clear()
 			.bgIndex(0);
 	}
-	
-	$scope.drawText = function(text, options) {
-		var backgroundColorIndex = options.background || $scope.BLACK_INDEX;
-		var font = 'c64';
-		var textAlign = options.textAlign || 'center';
-		var foregroundColorIndex = (options.foreground || $scope.WHITE_INDEX);
-		var characterHeight = 8;
-		var line = options.line || 0;
-		var y = characterHeight * line;
-		
-		$scope.context
-			.fillIndex(backgroundColorIndex)
-			.font(font)
-			.textAlign(textAlign)
-			.penIndex(foregroundColorIndex)
-			.text(text, $scope.canvasWidth, y);
-			
-	}
-	
-    $scope.drawTextAtLine = function (text, line) {	
-		$scope.drawText(text, { line: line });
-    };
-		
+				
 	$scope.drawWagon = function() {	
 		if ($scope.animationIndex === 0) {
-			$scope.context.drawImage($scope.wagonImage1, 200, 40);
+			userInterfaceData.context.drawImage($scope.wagonImage1, 200, 40);
 		}
 		else {
-			$scope.context.drawImage($scope.wagonImage2, 200, 40);
+			userInterfaceData.context.drawImage($scope.wagonImage2, 200, 40);
 		}
 	}
 	
@@ -119,8 +91,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		$scope.grassImage = $scope.loadImage('img/grass.gif');
 		$scope.plainsBackgroundImage = $scope.loadImage('img/plains-background.gif');
 		
-		$scope.context.drawImage($scope.grassImage, 0, 88);
-		$scope.context.drawImage($scope.plainsBackgroundImage, 0, 0);
+		userInterfaceData.context.drawImage($scope.grassImage, 0, 88);
+		userInterfaceData.context.drawImage($scope.plainsBackgroundImage, 0, 0);
 		
 		for (var i = 0; i < landmarkData.landmarks.length; i++) {
 			var landmark = landmarkData.landmarks[i];
@@ -129,6 +101,10 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 			image.src = landmark.src;			
 			landmark.image = image;
 		}
+		
+		imageData.failureScreen = new Image;
+		imageData.failureScreen.onload = null;
+		imageData.failureScreen.src = 'img/defeat.gif';		
 	}
 	
 	$scope.getNextLandmark = function() {
@@ -150,19 +126,19 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 	}
 	
 	$scope.drawPlainsBackground = function() {				
-		$scope.context.drawImage($scope.grassImage, 0, 67);
-		$scope.context.drawImage($scope.plainsBackgroundImage, 0, 20);
+		userInterfaceData.context.drawImage($scope.grassImage, 0, 67);
+		userInterfaceData.context.drawImage($scope.plainsBackgroundImage, 0, 20);
 	}
 	
 	$scope.renderWalkingScreen = function() {
 	
-		$scope.context.penColor(null);
-		$scope.context.fillColor(255, 255, 255);
+		userInterfaceData.context.penColor(null);
+		userInterfaceData.context.fillColor(255, 255, 255);
 		
 		$scope.drawPlainsBackground();
-		$scope.context.rect(0, 88, 280, 190);
+		userInterfaceData.context.rect(0, 88, 280, 190);
 		
-		$scope.drawTextAtLine('The Mormon Trail', 1);
+		userInterfaceService.drawTextAtLine('The Mormon Trail', 1);
 		
 		var date = $scope.date.toDateString();
 		var health = healthService.getHealth();
@@ -176,8 +152,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		
 		for (var i = 0; i < whiteLinesToDraw.length; i++) {
 			var line = whiteLinesToDraw[i];
-			$scope.drawText(line.label, {background: $scope.WHITE_INDEX, foreground: $scope.BLACK_INDEX -1, line: 16 + i, textAlign: 'right' });
-			$scope.drawText(line.value, {background: $scope.WHITE_INDEX, foreground: $scope.BLACK_INDEX -1, line: 16 + i, textAlign: 'left' });
+			userInterfaceService.drawText(line.label, {background: userInterfaceData.WHITE_INDEX, foreground: userInterfaceData.BLACK_INDEX -1, line: 16 + i, textAlign: 'right' });
+			userInterfaceService.drawText(line.value, {background: userInterfaceData.WHITE_INDEX, foreground: userInterfaceData.BLACK_INDEX -1, line: 16 + i, textAlign: 'left' });
 		}
 		
 		$scope.drawWagon();
@@ -185,7 +161,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 	
 	$scope.showSceneForCurrentLandmark = function() {
 		userInterfaceData.modal = null;
-		$scope.screen = 'LANDMARK';
+		userInterfaceData.screen = 'LANDMARK';
 		userInterfaceData.inputCallback = 'returnToWalking';
 	}
 	
@@ -193,44 +169,31 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 	
 		var landmark = $scope.getNextLandmark();
 	
-		$scope.context
+		userInterfaceData.context
 			.drawImage(landmark.image, 0, 0, 280, 160, 'palette-fs');
-		$scope.drawTextAtLine(landmark.name, 21);
-		$scope.drawTextAtLine($scope.date.toDateString(), 22);
+		userInterfaceService.drawTextAtLine(landmark.name, 21);
+		userInterfaceService.drawTextAtLine($scope.date.toDateString(), 22);
 		
-		$scope.drawText('Press ENTER to continue', {background: $scope.WHITE_INDEX, foreground: $scope.BLACK_INDEX -1, line: 23 });
+		userInterfaceService.drawText('Press ENTER to continue', {background: userInterfaceData.WHITE_INDEX, foreground: userInterfaceData.BLACK_INDEX -1, line: 23 });
 	}
 	
 	$scope.renderVictoryScreen = function() {
 	
 		var image = landmarkData.landmarks[landmarkData.landmarks.length - 1].image;
-		$scope.context
+		userInterfaceData.context
 			.drawImage(image, 0, 0, 280, 160, 'palette-fs');
-		$scope.drawTextAtLine('This is the place!', 21);
+		userInterfaceService.drawTextAtLine('This is the place!', 21);
 		
 		userInterfaceData.modal = 'Congratulations!  You have made it to the Salt Lake valley.';
-	}
-	
-	$scope.wordWrap = function(text) {
-		
-		var width = 25;
-		
-		if (!text) { 
-			return text; 
-		}
-	 
-		var regex = '.{1,' + width + '}(\\s|$)|\\S+?(\\s|$)';
-	 
-		var lines = text.match( RegExp(regex, 'g') );
-		
-		return lines;
-		
 	}
 	
 	$scope.render = function() {
 		$scope.clearCanvas();
 		
-		switch ($scope.screen) {
+		switch (userInterfaceData.screen) {
+			case 'DEFEAT':
+				userInterfaceService.renderDefeatScreen();
+				break;
 			case 'TRAVEL':
 				$scope.renderWalkingScreen();
 				break;
@@ -243,18 +206,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 				break;
 		}
 		
-		if (userInterfaceData.modal != null) {		
-			var text = userInterfaceData.modal;
-			var lines = $scope.wordWrap(text);
-			
-			$scope.context.penColor(255,255,255);
-			$scope.context.fillColor(0,0,0);
-			$scope.context.rect(35, 75, 210, 10 + (8*lines.length));
-		
-			for (var i = 0; i < lines.length; i++) {
-				$scope.drawTextAtLine(lines[i], 10+i);					
-			}
-		}
+		userInterfaceService.renderModal();
 	}
 	
 	$scope.playARandomTrailSong = function() {
@@ -284,7 +236,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 	}
 	
 	$scope.returnToWalking = function() {
-		$scope.screen = 'TRAVEL';
+		userInterfaceData.screen = 'TRAVEL';
 		userInterfaceData.animating = true;
 		userInterfaceData.modal = null;
 		$scope.roadometer++;
@@ -334,8 +286,9 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		}
 	}
 	
-	$scope.starveSomeone = function() {
-		console.log("ERROR: starveSomeone is not yet implemented.");
+	$scope.starveSomeone = function() {	
+		var person = randomService.getLivingPartyMember();	
+		deathService.killPerson(person, 'starvation');
 	}
 	
 	$scope.eatFood = function() {
@@ -343,7 +296,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		var livingMembersOfParty = partyData.party.length;
 		for (var i = 0; i < partyData.party.length; i++) {
 			var person = partyData.party[i];
-			if (person.isDead) {
+			if (!person.alive) {
 				livingMembersOfParty--;
 			}
 		}
@@ -351,7 +304,9 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		var dailyNutritionRequirement = livingMembersOfParty * $scope.dailyRation;
 		$scope.food -= dailyNutritionRequirement;
 		if ($scope.food < 0) {
-			$scope.starveSomeone();
+			if (randomService.random(1, 10) == 1) {
+				$scope.starveSomeone();
+			}
 			$scope.food = 0;			
 		}
 	} 
@@ -368,7 +323,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		var now = new Date();
 		var timeSinceLastUpdate = now.getTime() - $scope.lastUpdated.getTime();
 
-		if ($scope.screen == 'TRAVEL') {
+		if (userInterfaceData.screen == 'TRAVEL') {
 			$scope.ensureThatASongIsPlaying();
 		
 			if (userInterfaceData.animating) {
@@ -377,7 +332,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 					$scope.roadometer = landmark.miles;
 		
 					if (landmark.name == 'Salt Lake Valley') {
-						$scope.screen = 'VICTORY';
+						userInterfaceData.screen = 'VICTORY';
 						$scope.stopAllAudio();
 						$scope.playAudio('audio/come-come-ye-saints.mp3');
 					}
@@ -415,13 +370,13 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		var canvas = document.getElementById('game');
 		var ctx = canvas.getContext('retro');
 		
-		$scope.context = ctx;
+		userInterfaceData.context = ctx;
 		
 		var res = ctx.resolution(),
 		w = res.width,
 		h = res.height,
 		canvasWidth = (w * 0.5)|0;
-		$scope.canvasWidth = canvasWidth;
+		userInterfaceData.canvasWidth = canvasWidth;
 		
 		$scope.loadAudio();
 		$scope.loadImages(function() {

@@ -1,6 +1,6 @@
 var gameApp = angular.module('gameApp');
 
-gameApp.service('healthService', function(partyData, randomService, userInterfaceData, userInterfaceService) {
+gameApp.service('healthService', function(deathService, partyData, randomService, userInterfaceData, userInterfaceService) {
 
 	this.getHealth = function() {
 		var partySize = partyData.party.length;
@@ -36,8 +36,7 @@ gameApp.service('healthService', function(partyData, randomService, userInterfac
 	}
 	
 	this.healSomeone = function() {
-		var index = randomService.random(0, partyData.party.length - 1);
-		var person = partyData.party[index];
+		var person = randomService.getLivingPartyMember();
 		if (person.diseases.length > 0) {
 			var disease = person.diseases[0];
 			person.diseases.pop(disease);
@@ -47,16 +46,18 @@ gameApp.service('healthService', function(partyData, randomService, userInterfac
 	}
 	
 	this.inflictADiseaseOnSomeone = function(disease) {
-		var index = randomService.random(0, partyData.party.length - 1);
-		var person = partyData.party[index];		
-		for (var i = 0; i < person.diseases; i++) {
-			if (person.diseases[i] == disease) {
-				return;
+		var person = randomService.getLivingPartyMember();
+		if (person.alive) {		
+			for (var i = 0; i < person.diseases; i++) {
+				if (person.diseases[i] == disease) {
+					deathService.killPerson(person, disease);		
+					return;
+				}
 			}
+			
+			person.diseases.push(disease);
+			userInterfaceData.modal = person.name + ' has ' + disease + '.';
+			userInterfaceService.haltForInput('returnToWalking');
 		}
-		
-		person.diseases.push(disease);
-		userInterfaceData.modal = person.name + ' has ' + disease + '.';
-		userInterfaceService.haltForInput('returnToWalking');
 	}
 });
