@@ -1,22 +1,21 @@
 var gameApp = angular.module('gameApp');
 
-gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landmarkData', 'partyData', 'userInterfaceData', 'healthService', 'randomService', 'userInterfaceService', 'deathService', 'imageData', function($scope, $timeout, audioData, landmarkData, partyData, userInterfaceData, healthService, randomService, userInterfaceService, deathService, imageData) {
+gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landmarkData', 'partyData', 'userInterfaceData', 'healthService', 'randomService', 'userInterfaceService', 'deathService', 'gameState', 'imageData', 'keyboardService', function($scope, $timeout, audioData, landmarkData, partyData, userInterfaceData, healthService, randomService, userInterfaceService, deathService, gameState, imageData, keyboardService) {
  
 	$scope.lastUpdated = new Date();
 
 	$scope.animationIndex = 0;
 		
+	$scope.isSoundEnabled = false;
+		
 	$scope.date = new Date(1847, 4, 5);
 	$scope.weather = 'warm';
 	$scope.food = 1000;
-	$scope.roadometer = 0;		
 	
 	// 1lbs per day is bare bones
 	// 2lbs per day is meager		
 	// 3lbs per day is filling
 	$scope.dailyRation = 3;
-	
-	$scope.inputBuffer = '';
 	
 	$scope.wagonImage1 = null;
 	$scope.wagonImage2 = null;	
@@ -88,11 +87,11 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		$scope.wagonImage2.onload = onload;
 		$scope.wagonImage2.src = 'img/handcart2.gif';
 		
-		$scope.grassImage = $scope.loadImage('img/grass.gif');
-		$scope.plainsBackgroundImage = $scope.loadImage('img/plains-background.gif');
+		imageData.grassImage = $scope.loadImage('img/grass.gif');
+		imageData.plainsBackgroundImage = $scope.loadImage('img/plains-background.gif');
 		
-		userInterfaceData.context.drawImage($scope.grassImage, 0, 88);
-		userInterfaceData.context.drawImage($scope.plainsBackgroundImage, 0, 0);
+		userInterfaceData.context.drawImage(imageData.grassImage, 0, 88);
+		userInterfaceData.context.drawImage(imageData.plainsBackgroundImage, 0, 0);
 		
 		for (var i = 0; i < landmarkData.landmarks.length; i++) {
 			var landmark = landmarkData.landmarks[i];
@@ -110,7 +109,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 	$scope.getNextLandmark = function() {
 		for (var i = 0; i < landmarkData.landmarks.length; i++) {
 			var landmark = landmarkData.landmarks[i];
-			if ($scope.roadometer <= landmark.miles) {
+			if (gameState.roadometer <= landmark.miles) {
 				return landmark;
 			}
 		}
@@ -120,25 +119,21 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 	$scope.milesToNextLandmark = function() {
 		var landmark = $scope.getNextLandmark();
 		if (landmark != null) {
-			return landmark.miles - $scope.roadometer;
+			return landmark.miles - gameState.roadometer;
 		}	
 		return 0;
 	}
 	
-	$scope.drawPlainsBackground = function() {				
-		userInterfaceData.context.drawImage($scope.grassImage, 0, 67);
-		userInterfaceData.context.drawImage($scope.plainsBackgroundImage, 0, 20);
-	}
-	
 	$scope.renderWalkingScreen = function() {
-	
+				
 		userInterfaceData.context.penColor(null);
 		userInterfaceData.context.fillColor(255, 255, 255);
 		
-		$scope.drawPlainsBackground();
-		userInterfaceData.context.rect(0, 88, 280, 190);
+		userInterfaceService.drawPlainsBackground();
+		userInterfaceData.context.rect(0, 124, 280, 190);
 		
-		userInterfaceService.drawTextAtLine('The Mormon Trail', 1);
+		userInterfaceService.drawTextAtLine('The Mormon Trail', 1);		
+		userInterfaceService.drawTextAtLine('Press ENTER to check the situation', 14);
 		
 		var date = $scope.date.toDateString();
 		var health = healthService.getHealth();
@@ -148,7 +143,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		whiteLinesToDraw.push({ label: 'Health: ', value: health});
 		whiteLinesToDraw.push({ label: 'Food: ', value: $scope.food + ' pounds'});
 		whiteLinesToDraw.push({ label: 'Next landmark: ', value: $scope.milesToNextLandmark() + ' miles'});
-		whiteLinesToDraw.push({ label: 'Miles traveled: ', value: $scope.roadometer + ' miles'});
+		whiteLinesToDraw.push({ label: 'Roadometer: ', value: gameState.roadometer + ' miles'});
 		
 		for (var i = 0; i < whiteLinesToDraw.length; i++) {
 			var line = whiteLinesToDraw[i];
@@ -157,12 +152,6 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		}
 		
 		$scope.drawWagon();
-	}
-	
-	$scope.showSceneForCurrentLandmark = function() {
-		userInterfaceData.modal = null;
-		userInterfaceData.screen = 'LANDMARK';
-		userInterfaceData.inputCallback = 'returnToWalking';
 	}
 	
 	$scope.renderLandmarkScreen = function() {
@@ -235,33 +224,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		}		
 	}
 	
-	$scope.returnToWalking = function() {
-		userInterfaceData.screen = 'TRAVEL';
-		userInterfaceData.animating = true;
-		userInterfaceData.modal = null;
-		$scope.roadometer++;
-	}
-	
-	$scope.handleInputForViewLandmarkOrReturnToTravel = function(input) {
-		console.log('handleInputForViewLandmarkOrReturnToTravel was called with input ' + input);
-		
-		if (input == 'Y' || input == 'YES') {
-			$scope.showSceneForCurrentLandmark();
-		}
-		else {
-			$scope.returnToWalking();
-		}
-	}
-	
 	$scope.keyup = function(event) {
-		var KEYCODE_ENTER = 13;
-		if (event.keyCode == KEYCODE_ENTER) {
-			$scope[userInterfaceData.inputCallback]($scope.inputBuffer);
-			$scope.inputBuffer = '';
-		}
-		else {
-			$scope.inputBuffer += String.fromCharCode(event.keyCode);
-		}
+		keyboardService.handleKeyboardInput(event.keyCode);
 	}
 	
 	$scope.considerSpawningARandomEvent = function() {
@@ -324,12 +288,14 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		var timeSinceLastUpdate = now.getTime() - $scope.lastUpdated.getTime();
 
 		if (userInterfaceData.screen == 'TRAVEL') {
-			$scope.ensureThatASongIsPlaying();
+			if ($scope.isSoundEnabled) {
+				$scope.ensureThatASongIsPlaying();
+			}
 		
 			if (userInterfaceData.animating) {
 				var landmark = $scope.getNextLandmark();
-				if ($scope.roadometer >= landmark.miles) {
-					$scope.roadometer = landmark.miles;
+				if (gameState.roadometer >= landmark.miles) {
+					gameState.roadometer = landmark.miles;
 		
 					if (landmark.name == 'Salt Lake Valley') {
 						userInterfaceData.screen = 'VICTORY';
@@ -345,8 +311,8 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 				
 					$scope.advanceTheDay();
 				
-					var distanceToNextLandmark = landmark.miles - $scope.roadometer;
-					$scope.roadometer += distanceToNextLandmark < 10 ? distanceToNextLandmark : 10;
+					var distanceToNextLandmark = landmark.miles - gameState.roadometer;
+					gameState.roadometer += distanceToNextLandmark < 10 ? distanceToNextLandmark : 10;
 				}
 			}
 		}

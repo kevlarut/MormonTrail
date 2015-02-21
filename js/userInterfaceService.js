@@ -7,6 +7,11 @@ gameApp.service('userInterfaceService', function(imageData, userInterfaceData) {
 		userInterfaceData.animating = false;
 	}
 		
+	this.drawPlainsBackground = function() {				
+		userInterfaceData.context.drawImage(imageData.grassImage, 0, 67);
+		userInterfaceData.context.drawImage(imageData.plainsBackgroundImage, 0, 20);
+	}
+	
 	this.drawTextAtLine = function (text, line) {	
 		this.drawText(text, { line: line });
     };
