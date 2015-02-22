@@ -2,11 +2,12 @@ var game = new function() {
 
 	var canvas = null;
 	var context = null;
-	var frameRate = 6;
+	var frameRate = 3;
 	var sprites = {};
 	var background = {};
 	var self = this;
 	var date = new Date(1847, 4, 5);
+	var roadometer = 0;
 	
 	this.ensureThatASongIsPlaying = function() {
 		for (var i = 0; i < audioAssets.length; i++) {
@@ -69,8 +70,10 @@ var game = new function() {
 
 	this.gameLoop = function() {
 	
-		var dayAdvancementSpeed = 1 / 5;
+		var dayAdvancementSpeed = 1 / 10;
 		date.setTime( date.getTime() + 1 * 86400000 * dayAdvancementSpeed );
+	
+		roadometer += Math.round(8.5 * dayAdvancementSpeed);
 	
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		
@@ -82,6 +85,7 @@ var game = new function() {
 		context.font = "8px 'Here Lies MECC'";
 		context.fillStyle = 'black';
 		context.fillText("Date: " + date.toDateString(), 10, 140);
+		context.fillText("Roadometer: " + roadometer + " miles", 10, 150);
 		
 		background.render(context, 0, 10);
 		sprites['handcart'].render(context, 180, 43);
