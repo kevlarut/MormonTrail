@@ -1,47 +1,22 @@
 <!DOCTYPE HTML>
-<html ng-app="gameApp">
+<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>The Mormon Trail</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css" />
-	
-	<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js"></script>
-	<script src="js/retro.js"></script>
-	<script src="js/retro.color.js"></script>
-	<script src="js/retro.context.js"></script>
-	<script src="js/retro.palette.js"></script>
-	<script src="js/retro.palettes.js"></script>
-	<script src="js/retro.point.js"></script>
-	<script src="js/retro.polyfills.js"></script>
-	<script src="js/retro.fonts.js"></script>		
-	<script src="js/gameApp.js"></script>
-	<script src="js/gameController.js"></script>
-	<script src="js/gameState.js"></script>
-	<script src="js/gameStateService.js"></script>
-	<script src="js/audioData.js"></script>
-	<script src="js/deathService.js"></script>
-	<script src="js/imageData.js"></script>
-	<script src="js/keyboardService.js"></script>
-	<script src="js/landmarkData.js"></script>
-	<script src="js/partyData.js"></script>
-	<script src="js/userInterfaceData.js"></script>
-	<script src="js/healthService.js"></script>
-	<script src="js/randomService.js"></script>
-	<script src="js/userInterfaceService.js"></script>
-	
+		
 </head>
-<body ng-controller="gameController" ng-keyup="keyup($event)">
+<body>
 
-	<div>
-        <div>
-            <canvas id="game" width="840" height="576" data-width="280" data-height="192">
-                <h1>Sorry, this browser does not have support for needed canvas / HTML5</h1>
-            </canvas>
-		</div>
-    </div>
+	<canvas id="game" width="280" height="192" class="dontBlurPixelsWhenScaling">
+		<h1>Sorry, this browser does not have support for needed canvas / HTML5</h1>
+	</canvas>
 
+	<script type="text/javascript" src="js/assets.js"></script>
+	<script type="text/javascript" src="js/sprite.js"></script>
+	<script type="text/javascript" src="js/scrollingSprite.js"></script>
+	<script type="text/javascript" src="js/game.js"></script>
+	
 </body>
 </html>

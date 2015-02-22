@@ -1,84 +1,103 @@
-var artist = new function() {
+var game = new function() {
 
-	this.animationIndex = 0;
-	this.context = null;
-	this.wagonImage1 = null;
-	this.wagonImage2 = null;
-	this.canvasWidth = 0;
+	var canvas = null;
+	var context = null;
+	var frameRate = 6;
+	var sprites = {};
+	var background = {};
+	var self = this;
+	var date = new Date(1847, 4, 5);
 	
-    this.drawTextAtLine = function (text, line) {
-		var ctx = this.context;
-		ctx	
-			.clear()
-			.bgIndex(0)
-			.fillIndex(0)
-			.font('c64')
-			.textAlign('center')
-			.penColor(255,255,255)
-			.text(text, this.canvasWidth, 8*line);
-    };
-		
-	this.drawWagon = function() {	
-		console.log(this.animationIndex + ' in drawWagon');	
-		if (this.animationIndex === 0) {
-			this.context.drawImage(artist.wagonImage1, 170, 40);
+	this.ensureThatASongIsPlaying = function() {
+		for (var i = 0; i < audioAssets.length; i++) {
+			var song = audioAssets[i];			
+			if (typeof song.element != 'undefined' && song.element.currentTime != 0 && song.element.currentTime < song.element.duration) {
+				return;
+			}
 		}
-		else {
-			this.context.drawImage(artist.wagonImage2, 170, 40);
+		
+		this.playTravelSong();
+	}
+	
+	this.playTravelSong = function() {		
+		var min = 1;
+		var max = audioAssets.length - 1;
+		var randomIndexExceptVictorySong = Math.floor(Math.random() * (max - min + 1) + min)
+	
+		var song = audioAssets[randomIndexExceptVictorySong];
+		if (typeof song.element != 'undefined') {
+			song.element.currentTime = 0;
+			song.element.play();
 		}
 	}
 	
-	this.loadImages = function(onload) {
-		artist.wagonImage1 = new Image;
-		artist.wagonImage1.crossOrigin = '';
-		//artist.wagonImage1.onload = onload;
-		artist.wagonImage1.src = 'img/handcart1.gif';
-		
-		artist.wagonImage2 = new Image;
-		artist.wagonImage2.crossOrigin = '';
-		artist.wagonImage2.onload = onload;
-		artist.wagonImage2.src = 'img/handcart2.gif';
+	this.preLoadAudio = function() {
+		for (var key in audioAssets) {		
+			if (audioAssets.hasOwnProperty(key)) {
+				var audioAsset = audioAssets[key];
+				var element = document.createElement('audio');
+				element.preload = 'auto';
+				element.src = audioAsset.src;			
+				audioAssets[key].element = element;
+			}			
+		}
 	}
 	
-	this.init = function() {	
-		var canvas = document.getElementById('game');
-		var ctx = canvas.getContext('retro');
+	this.preLoadImages = function() {
+		for (var key in spriteAssets) {
+			if (spriteAssets.hasOwnProperty(key)) {
+				var spriteAsset = spriteAssets[key];
+				var currentSprite = new sprite();				
+				currentSprite.preLoadImages(spriteAsset);
+				sprites[key] = currentSprite;
+			}
+		}
 		
-		this.context = ctx;
-		
-		var res = ctx.resolution(),
-		w = res.width,
-		h = res.height,
-		canvasWidth = (w * 0.5)|0;
-		this.canvasWidth = canvasWidth;
-		
-		this.loadImages(function() {
-			ctx
-				.palette('APPLEII')
-				.addFonts([fontC64, fontRetroBig], startGame, function() { console.log('A font is missing...'); });
-		});
+		background = new scrollingSprite();
+		background.preLoadImages(['img/plains-background.gif']);		
 	}
 	
-	this.renderWalkingScreen = function() {
-		artist.drawTextAtLine('The Mormon Trail', 1);
-		artist.drawWagon();		
+	this.start = function() {
+		canvas = document.getElementById('game');		
+		context = canvas.getContext('2d');		
+		this.preLoadAudio();
+		this.preLoadImages();
+				
+		this.gameLoop();
+		setInterval(this.gameLoop, 1000 / frameRate);
 	}
-	
+
 	this.gameLoop = function() {
-		console.log(this.animationIndex + ' in gameLoop');
-		artist.renderWalkingScreen();
-		if (this.animationIndex == 0) {
-			this.animationIndex = 1;
+	
+		var dayAdvancementSpeed = 1 / 5;
+		date.setTime( date.getTime() + 1 * 86400000 * dayAdvancementSpeed );
+	
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		
+		context.beginPath();
+		context.rect(0, 123, 280, 59);
+		context.fillStyle = 'white';
+		context.fill();
+		
+		context.font = "8px 'Here Lies MECC'";
+		context.fillStyle = 'black';
+		context.fillText("Date: " + date.toDateString(), 10, 140);
+		
+		background.render(context, 0, 10);
+		sprites['handcart'].render(context, 180, 43);
+		sprites['grass'].render(context, 0, 70);
+		
+		for (var key in sprites) {
+			if (sprites.hasOwnProperty(key)) {			
+				sprites[key].update();
+			}
 		}
-		else {
-			this.animationIndex = 0;
-		}
+		background.update();
+		
+		self.ensureThatASongIsPlaying();
 	}
 }
 
-artist.init();
-	
-function startGame() {
-	artist.gameLoop();
-	setInterval(artist.gameLoop, 1000);
-}
+window.onload = function() {
+	game.start();
+};
