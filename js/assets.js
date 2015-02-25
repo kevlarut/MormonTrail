@@ -5,6 +5,15 @@ var spriteAssets = {
 		'img/handcart1.gif',
 		'img/handcart2.gif'
 	],
+	'chimney-rock': ['img/chimney-rock.gif'],
+	'defeat': ['img/defeat.gif'],
+	'echo-canyon': ['img/echo-canyon.gif'],
+	'emigration-canyon': ['img/emigration-canyon.gif'],
+	'fort-laramie': ['img/fort-laramie.gif'],
+	'martins-cove': ['img/martins-cove.gif'],
+	'salt-lake-valley': ['img/salt-lake-valley.gif'],
+	'sugar-creek': ['img/sugar-creek.gif'],
+	'winter-quarters': ['img/winter-quarters.gif'],
 }
 
 var audioAssets = [

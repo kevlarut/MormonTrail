@@ -9,6 +9,7 @@ var game = new function() {
 	var date = new Date(1847, 4, 5);
 	var roadometer = 0;
 	var isPaused = false;
+	var nextLandmarkIndex = 0;
 	
 	this.togglePause = function() {
 		isPaused = !isPaused;
@@ -22,7 +23,7 @@ var game = new function() {
 			}
 		}
 		
-		this.playTravelSong();
+		this.playTravelSong(); 
 	}
 	
 	this.playTravelSong = function() {		
@@ -79,7 +80,37 @@ var game = new function() {
 			var dayAdvancementSpeed = 1 / 10;
 			date.setTime( date.getTime() + 1 * 86400000 * dayAdvancementSpeed );
 		
-			roadometer += Math.round(8.5 * dayAdvancementSpeed);
+			var milesTraveled = Math.round(8.5 * dayAdvancementSpeed);
+			var nextLandmark = landmarks[nextLandmarkIndex];
+			var nextLandmarkMiles = nextLandmark.miles;
+			if (roadometer + milesTraveled >= nextLandmarkMiles) {
+				roadometer = nextLandmarkMiles;
+				nextLandmarkIndex++;				
+				
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				sprites[nextLandmark.sprite].render(context, 0, 0);
+				
+				var horizontalCenter = canvas.width / 2;
+				
+				context.beginPath();
+				context.rect(horizontalCenter - 100, 162, 200, 20);
+				context.fillStyle = 'white';
+				context.fill();
+				
+				context.textAlign = 'center';
+				context.font = "8px 'Here Lies MECC'";
+				context.fillStyle = 'black';
+				context.fillText(nextLandmark.name, horizontalCenter, 170);
+				context.fillText(date.toDateString(), horizontalCenter, 180);
+				context.fillStyle = 'white';
+				context.fillText("Press ENTER to continue", horizontalCenter, 190);
+				
+				isPaused = true;
+				return;
+			}
+			else {
+				roadometer += milesTraveled;
+			}
 		
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			
@@ -88,6 +119,7 @@ var game = new function() {
 			context.fillStyle = 'white';
 			context.fill();
 			
+			context.textAlign = 'left';
 			context.font = "8px 'Here Lies MECC'";
 			context.fillStyle = 'black';
 			context.fillText("Date: " + date.toDateString(), 10, 140);
