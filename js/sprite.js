@@ -2,9 +2,10 @@ function sprite() {
 	this.animationIndex = 0;
 	this.frameImages = [];
 	
-	this.preLoadImages = function(frameSources) {
+	this.preLoadImages = function(frameSources, callback) {
 		for (var i = 0; i < frameSources.length; i++) {
 			var image = new Image;
+			image.onload = callback;
 			image.src = frameSources[i];
 			this.frameImages.push(image);
 		}

@@ -14,6 +14,14 @@ var spriteAssets = {
 	'salt-lake-valley': ['img/salt-lake-valley.gif'],
 	'sugar-creek': ['img/sugar-creek.gif'],
 	'winter-quarters': ['img/winter-quarters.gif'],
+	'brigham': ['img/brigham.gif'],
+	'joseph': ['img/joseph.gif'],
+	'emma': ['img/emma.gif'],
+	'sarah': ['img/sarah.gif'],	
+	'samuel': ['img/samuel.gif'],	
+	'alma': ['img/alma.gif'],	
+	'lucy': ['img/lucy.gif'],	
+	'elizabeth': ['img/elizabeth.gif'],	
 }
 
 var audioAssets = [

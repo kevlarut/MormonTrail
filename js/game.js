@@ -51,31 +51,30 @@ var game = new function() {
 	}
 	
 	this.preLoadImages = function() {
+	
+		var countOfImagesToLoad = Object.keys(spriteAssets).length + 1;
+		var loaded = 0;
+	
+		var callback = function() { 
+			if (++loaded > countOfImagesToLoad) {
+				self.chooseCharacterNames();
+			}
+		}
+		
 		for (var key in spriteAssets) {
 			if (spriteAssets.hasOwnProperty(key)) {
 				var spriteAsset = spriteAssets[key];
 				var currentSprite = new sprite();				
-				currentSprite.preLoadImages(spriteAsset);
+				currentSprite.preLoadImages(spriteAsset, callback);
 				sprites[key] = currentSprite;
 			}
 		}
 		
 		background = new scrollingSprite();
-		background.preLoadImages(['img/plains-background.gif']);		
-	}
-	
-	this.start = function() {
-		canvas = document.getElementById('game');		
-		context = canvas.getContext('2d');		
-		this.preLoadAudio();
-		this.preLoadImages();
-				
-		this.gameLoop();
-		setInterval(this.gameLoop, 1000 / frameRate);
+		background.preLoadImages(['img/plains-background.gif'], callback);
 	}
 
-	this.gameLoop = function() {
-	
+	this.gameLoop = function() {	
 		if (!isPaused) {
 			var dayAdvancementSpeed = 1 / 10;
 			date.setTime( date.getTime() + 1 * 86400000 * dayAdvancementSpeed );
@@ -139,8 +138,172 @@ var game = new function() {
 		
 		self.ensureThatASongIsPlaying();
 	}
+	
+	this.chooseCharacterNames = function() {
+	
+		var partySize = 4;
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		
+		context.beginPath();
+		context.rect(20, 10, 240, 25);
+		context.fillStyle = 'white';
+		context.fill();
+			
+		context.textAlign = 'center';
+		context.font = "8px 'Here Lies MECC'";
+		context.fillStyle = 'black';
+		
+		var horizontalCenter = canvas.width / 2;
+		context.fillText("The Mormon Trail", horizontalCenter, 20);
+		context.fillText("by Kevin Owens", horizontalCenter, 30);
+		
+		context.textAlign = 'left';
+		context.fillStyle = 'white';
+		context.fillText("Choose four family members:", 20, 50);
+		context.fillText("Press SPACE to choose someone", 20, 172);
+		
+		var names = [
+			{ name: 'Joseph', selected: false },
+			{ name: 'Emma', selected: false }, 
+			{ name: 'Brigham', selected: false }, 
+			{ name: 'Lucy', selected: false }, 
+			{ name: 'Samuel', selected: false }, 
+			{ name: 'Sarah', selected: false }, 
+			{ name: 'Alma', selected: false }, 
+			{ name: 'Elizabeth', selected: false }
+		];
+		var party = [];
+		var cursor = 0;
+		var selectedCount = 0;
+		drawCharacterMenu(cursor, names);
+		
+		window.addEventListener('keydown', function(event) {
+			var ENTER = 13;
+			var SPACE = 32;
+			var LEFT = 37;
+			var UP = 38;
+			var RIGHT = 39;
+			var DOWN = 40;	  
+		  
+			switch (event.keyCode) {
+				case ENTER:
+					if (selectedCount == partySize) {
+						window.removeEventListener('keydown', arguments.callee, false);
+						start();
+					}
+					break;
+				case SPACE:
+					if (names[cursor].selected) {
+						names[cursor].selected = false;
+						selectedCount--;
+						context.clearRect(17, 175, 240, 13);
+					}
+					else if (selectedCount < partySize) {
+						names[cursor].selected = true;
+						selectedCount++;
+						if (selectedCount == partySize) {
+							context.beginPath();
+							context.rect(17, 175, 240, 13);
+							context.fillStyle = 'white';
+							context.fill();
+		
+							context.fillStyle = 'black';
+							context.fillText("Press ENTER to start the game", 20, 185);
+						}
+					}
+					drawCharacterMenu(cursor, names);
+					break;
+				case LEFT:
+					if (cursor % 2 == 1) {
+						cursor--;
+						drawCharacterMenu(cursor, names);
+					}
+					break;
+				case UP:
+					if (cursor > 1) {
+						cursor -= 2;
+						drawCharacterMenu(cursor, names);
+					}
+					break;
+				case RIGHT:
+					if (cursor % 2 == 0) {
+						cursor++;
+						drawCharacterMenu(cursor, names);
+					}
+					break;
+				case DOWN:
+					if (cursor < names.length - 2) {
+						cursor += 2;
+						drawCharacterMenu(cursor, names);
+					}
+					break;
+			}
+		}, false);
+	}
+	
+	var drawCharacterMenu = function(cursor, names) {
+		context.clearRect(0, 58, canvas.width, 100);
+		var index = 0;
+		for (var row = 0; row < 4; row++) {
+			for (var col = 0; col < 2; col++) {
+				
+				var x = 20 + col * 100;
+				var y = 60 + row * 25;
+				if (index === cursor) {				
+					context.beginPath();
+					context.rect(x - 2, y - 2, 24, 24);
+					context.fillStyle = 'white';
+					context.fill();
+				}
+			
+				var name = names[index];
+				sprites[name.name.toLowerCase()].render(context, x, y);
+				if (name.selected) {
+					context.fillStyle = 'white';
+				}
+				else {
+					context.fillStyle = 'gray';
+				}
+				context.fillText(name.name, x + 25, y + 12);
+				index++;
+			}
+		}	
+	}
+	
+	this.init = function() {
+		canvas = document.getElementById('game');		
+		context = canvas.getContext('2d');
+		showLoadingScreen();				
+		this.preLoadAudio();
+		this.preLoadImages();
+	}
+	
+	var start = function() {
+	
+		window.addEventListener('keydown', function(event) {
+			var ENTER = 13;
+		  
+			switch (event.keyCode) {
+				case ENTER:
+					game.togglePause();
+					break;
+			}
+		}, false);
+				
+		self.gameLoop();
+		setInterval(self.gameLoop, 1000 / frameRate);	
+	}
+	
+	var showLoadingScreen = function() {
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		context.textAlign = 'center';
+		context.font = "8px 'Here Lies MECC'";
+		context.fillStyle = 'white';		
+		var horizontalCenter = canvas.width / 2;
+		context.fillText("Loading...", horizontalCenter, 80);
+	}
 }
 
 window.onload = function() {
-	game.start();
+	game.init();
 };
