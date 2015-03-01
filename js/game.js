@@ -10,6 +10,7 @@ var game = new function() {
 	var roadometer = 0;
 	var isPaused = false;
 	var nextLandmarkIndex = 0;
+	var gameLoopInterval = null;
 	
 	this.togglePause = function() {
 		isPaused = !isPaused;
@@ -73,8 +74,16 @@ var game = new function() {
 		background = new scrollingSprite();
 		background.preLoadImages(['img/plains-background.gif'], callback);
 	}
-
-	this.gameLoop = function() {	
+	
+	var stopAllAudio = function() {
+		for (var i = 0; i < audioAssets.length; i++) {
+			var song = audioAssets[i];
+			song.element.pause();
+			song.element.currentTime = 0;
+		}
+	}
+	
+	this.gameLoop = function() {
 		if (!isPaused) {
 			var dayAdvancementSpeed = 1 / 10;
 			date.setTime( date.getTime() + 1 * 86400000 * dayAdvancementSpeed );
@@ -82,9 +91,10 @@ var game = new function() {
 			var milesTraveled = Math.round(8.5 * dayAdvancementSpeed);
 			var nextLandmark = landmarks[nextLandmarkIndex];
 			var nextLandmarkMiles = nextLandmark.miles;
-			if (roadometer + milesTraveled >= nextLandmarkMiles) {
+			if (roadometer + milesTraveled >= nextLandmarkMiles) {		
+			
 				roadometer = nextLandmarkMiles;
-				nextLandmarkIndex++;				
+				nextLandmarkIndex++;			
 				
 				context.clearRect(0, 0, canvas.width, canvas.height);
 				sprites[nextLandmark.sprite].render(context, 0, 0);
@@ -96,13 +106,56 @@ var game = new function() {
 				context.fillStyle = 'white';
 				context.fill();
 				
-				context.textAlign = 'center';
-				context.font = "8px 'Here Lies MECC'";
-				context.fillStyle = 'black';
-				context.fillText(nextLandmark.name, horizontalCenter, 170);
-				context.fillText(date.toDateString(), horizontalCenter, 180);
-				context.fillStyle = 'white';
-				context.fillText("Press ENTER to continue", horizontalCenter, 190);
+				if (nextLandmarkIndex == landmarks.length) {
+					context.textAlign = 'center';
+					context.font = "8px 'Here Lies MECC'";
+					context.fillStyle = 'black';
+					context.fillText(nextLandmark.name, horizontalCenter, 170);
+					context.fillText(date.toDateString(), horizontalCenter, 180);
+														
+					context.fillText('"The wilderness and the solitary', horizontalCenter, 10);
+					context.fillText('place shall be glad for them; and', horizontalCenter, 20);
+					context.fillText('the desert shall rejoice, and', horizontalCenter, 30);
+					context.fillText('blossom as the rose." (Isaiah 35:1)', horizontalCenter, 40);
+					
+					stopAllAudio();
+						
+					context.fillStyle = 'white';
+					context.fillText("Press ENTER to start a new game", horizontalCenter, 190);
+					
+					var song = audioAssets[0];
+					if (typeof song.element != 'undefined') {
+						song.element.currentTime = 0;
+						song.element.play();
+					}
+					
+					clearInterval(gameLoopInterval);
+					window.document.onkeydown = null;
+					window.document.onkeydown = function(event) {
+						var ENTER = 13;					  
+						switch (event.keyCode) {
+							case ENTER:			
+								window.document.onkeydown = null;
+								date = new Date(1847, 4, 5);
+								roadometer = 0;
+								isPaused = false;
+								nextLandmarkIndex = 0;
+							
+								self.chooseCharacterNames();
+								break;
+						}
+					}			
+					
+				}
+				else {				
+					context.textAlign = 'center';
+					context.font = "8px 'Here Lies MECC'";
+					context.fillStyle = 'black';
+					context.fillText(nextLandmark.name, horizontalCenter, 170);
+					context.fillText(date.toDateString(), horizontalCenter, 180);
+					context.fillStyle = 'white';
+					context.fillText("Press ENTER to continue", horizontalCenter, 190);
+				}
 				
 				isPaused = true;
 				return;
@@ -141,6 +194,8 @@ var game = new function() {
 	
 	this.chooseCharacterNames = function() {
 	
+		stopAllAudio();
+	
 		var partySize = 4;
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		
@@ -177,7 +232,7 @@ var game = new function() {
 		var selectedCount = 0;
 		drawCharacterMenu(cursor, names);
 		
-		window.addEventListener('keydown', function(event) {
+		window.document.onkeydown = function(event) {
 			var ENTER = 13;
 			var SPACE = 32;
 			var LEFT = 37;
@@ -188,7 +243,7 @@ var game = new function() {
 			switch (event.keyCode) {
 				case ENTER:
 					if (selectedCount == partySize) {
-						window.removeEventListener('keydown', arguments.callee, false);
+						window.document.onkeydown = null;
 						start();
 					}
 					break;
@@ -238,7 +293,7 @@ var game = new function() {
 					}
 					break;
 			}
-		}, false);
+		}
 	}
 	
 	var drawCharacterMenu = function(cursor, names) {
@@ -280,7 +335,7 @@ var game = new function() {
 	
 	var start = function() {
 	
-		window.addEventListener('keydown', function(event) {
+		window.document.onkeydown = function(event) {
 			var ENTER = 13;
 		  
 			switch (event.keyCode) {
@@ -288,10 +343,9 @@ var game = new function() {
 					game.togglePause();
 					break;
 			}
-		}, false);
-				
+		}
 		self.gameLoop();
-		setInterval(self.gameLoop, 1000 / frameRate);	
+		gameLoopInterval = setInterval(self.gameLoop, 1000 / frameRate);	
 	}
 	
 	var showLoadingScreen = function() {
