@@ -222,8 +222,8 @@ var game = new function() {
 			{ name: 'Emma', selected: false }, 
 			{ name: 'Brigham', selected: false }, 
 			{ name: 'Lucy', selected: false }, 
-			{ name: 'Samuel', selected: false }, 
-			{ name: 'Sarah', selected: false }, 
+			{ name: 'John', selected: false }, 
+			{ name: 'Mary', selected: false }, 
 			{ name: 'Alma', selected: false }, 
 			{ name: 'Elizabeth', selected: false }
 		];
