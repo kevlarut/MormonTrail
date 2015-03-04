@@ -11,6 +11,7 @@ var game = new function() {
 	var isPaused = false;
 	var nextLandmarkIndex = 0;
 	var gameLoopInterval = null;
+	var party = [];
 	
 	this.togglePause = function() {
 		isPaused = !isPaused;
@@ -131,10 +132,9 @@ var game = new function() {
 					
 					clearInterval(gameLoopInterval);
 					window.document.onkeydown = null;
-					window.document.onkeydown = function(event) {
-						var ENTER = 13;					  
+					window.document.onkeydown = function(event) {		  
 						switch (event.keyCode) {
-							case ENTER:			
+							case keyboard.ENTER:			
 								window.document.onkeydown = null;
 								date = new Date(1847, 4, 5);
 								roadometer = 0;
@@ -192,8 +192,132 @@ var game = new function() {
 		self.ensureThatASongIsPlaying();
 	}
 	
-	this.chooseCharacterNames = function() {
+	var drawBuySuppliesMenu = function(cursor, items, capacity) {
 	
+		context.clearRect(0, 15, canvas.width, 100);
+		
+		var food = capacity;
+	
+		var line = 0;
+		for (line = 0; line < items.length; line++) {
+			var item = items[line];
+			
+			if (item.isSelected) {
+				food -= item.weight;
+			}
+			
+			var y = 25 + 15 * line;
+			
+			if (line === cursor) {		
+				context.beginPath();
+				context.rect(0, y - 10, canvas.width, 12);
+				context.fillStyle = 'white';
+				context.fill();
+				context.fillStyle = 'black';
+			}
+			else {			
+				context.fillStyle = 'white';
+			}
+			
+			context.textAlign = 'left';
+			context.fillText('[' + (item.isSelected ? 'X' : ' ') + '] ' + item.name, 10, y);				
+			context.textAlign = 'right';
+			context.fillText(item.weight + '#', 275, y);
+		}
+		
+		context.textAlign = 'left';
+		context.fillText('You will carry ' + food + ' pounds of food.', 10, 40 + line * 15);
+	}
+	
+	var buySupplies = function() {
+		var capacity = 500;
+		var clothingWeight = 0;
+		for (var i = 0; i < party.length; i++) {
+			if (party[i].isAdult) {
+				clothingWeight += 17;
+			}
+			else {
+				clothingWeight += 10;
+			}
+		}
+	
+		stopAllAudio();
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		
+		context.textAlign = 'center';
+		context.font = "8px 'Here Lies MECC'";
+		context.fillStyle = 'black';
+		
+		context.beginPath();
+		context.rect(0, 0, canvas.width, 13);
+		context.fillStyle = '#93D6BF';
+		context.fill();
+		
+		var horizontalCenter = canvas.width / 2;		
+		context.textAlign = 'left';
+		context.fillStyle = 'black';
+		context.fillText("Pioneer Outfitter General Store", 10, 10);
+		context.fillStyle = 'white';
+		
+		var items = [
+			{
+				name: 'Spiffy home decorations',
+				weight: 60,
+				isSelected: false,
+				isRequired: false
+			},
+			{
+				name: 'Guns and ammunition',
+				weight: 10,
+				isSelected: false,
+				isRequired: false
+			},
+			{
+				name: 'Clothing and suchlike',
+				weight: clothingWeight,
+				isSelected: true,
+				isRequired: true
+			},
+		];
+		
+		var cursor = 0;	
+		drawBuySuppliesMenu(cursor, items, capacity);
+				
+		context.beginPath();
+		context.rect(17, 175, 240, 13);
+		context.fillStyle = 'white';
+		context.fill();
+
+		context.fillStyle = 'black';
+		context.fillText("Press ENTER to continue", 20, 185);
+				
+		window.document.onkeydown = function(event) {
+			switch (event.keyCode) {
+				case keyboard.ENTER:
+					window.document.onkeydown = null;
+					start();
+					break;
+				case keyboard.X:
+					items[cursor].isSelected = !items[cursor].isSelected;
+					drawBuySuppliesMenu(cursor, items, capacity);
+					break;
+				case keyboard.UP:
+					if (cursor > 0) {
+						cursor--;
+						drawBuySuppliesMenu(cursor, items, capacity);
+					}
+					break;
+				case keyboard.DOWN:
+					if (cursor < items.length - 2) {
+						cursor++;
+						drawBuySuppliesMenu(cursor, items, capacity);
+					}
+					break;
+			}
+		}
+	}
+			
+	this.chooseCharacterNames = function() {
 		stopAllAudio();
 	
 		var partySize = 4;
@@ -218,36 +342,34 @@ var game = new function() {
 		context.fillText("Press SPACE to choose someone", 20, 172);
 		
 		var names = [
-			{ name: 'Joseph', selected: false },
-			{ name: 'Emma', selected: false }, 
-			{ name: 'Brigham', selected: false }, 
-			{ name: 'Lucy', selected: false }, 
-			{ name: 'John', selected: false }, 
-			{ name: 'Mary', selected: false }, 
-			{ name: 'Alma', selected: false }, 
-			{ name: 'Elizabeth', selected: false }
+			{ name: 'Joseph', isAdult: true, selected: false },
+			{ name: 'Emma', isAdult: true, selected: false }, 
+			{ name: 'Brigham', isAdult: true, selected: false }, 
+			{ name: 'Lucy', isAdult: true, selected: false }, 
+			{ name: 'John', isAdult: false, selected: false }, 
+			{ name: 'Mary', isAdult: false, selected: false }, 
+			{ name: 'Alma', isAdult: false, selected: false }, 
+			{ name: 'Elizabeth', isAdult: false, selected: false }
 		];
-		var party = [];
 		var cursor = 0;
 		var selectedCount = 0;
 		drawCharacterMenu(cursor, names);
 		
 		window.document.onkeydown = function(event) {
-			var ENTER = 13;
-			var SPACE = 32;
-			var LEFT = 37;
-			var UP = 38;
-			var RIGHT = 39;
-			var DOWN = 40;	  
-		  
 			switch (event.keyCode) {
-				case ENTER:
+				case keyboard.ENTER:
 					if (selectedCount == partySize) {
 						window.document.onkeydown = null;
-						start();
+						for (var i = 0; i < names.length; i++) {
+							var name = names[i];
+							if (name.selected) {
+								party.push(name);
+							}
+						}
+						buySupplies();
 					}
 					break;
-				case SPACE:
+				case keyboard.SPACE:
 					if (names[cursor].selected) {
 						names[cursor].selected = false;
 						selectedCount--;
@@ -263,30 +385,30 @@ var game = new function() {
 							context.fill();
 		
 							context.fillStyle = 'black';
-							context.fillText("Press ENTER to start the game", 20, 185);
+							context.fillText("Press ENTER to continue", 20, 185);
 						}
 					}
 					drawCharacterMenu(cursor, names);
 					break;
-				case LEFT:
+				case keyboard.LEFT:
 					if (cursor % 2 == 1) {
 						cursor--;
 						drawCharacterMenu(cursor, names);
 					}
 					break;
-				case UP:
+				case keyboard.UP:
 					if (cursor > 1) {
 						cursor -= 2;
 						drawCharacterMenu(cursor, names);
 					}
 					break;
-				case RIGHT:
+				case keyboard.RIGHT:
 					if (cursor % 2 == 0) {
 						cursor++;
 						drawCharacterMenu(cursor, names);
 					}
 					break;
-				case DOWN:
+				case keyboard.DOWN:
 					if (cursor < names.length - 2) {
 						cursor += 2;
 						drawCharacterMenu(cursor, names);
@@ -336,10 +458,8 @@ var game = new function() {
 	var start = function() {
 	
 		window.document.onkeydown = function(event) {
-			var ENTER = 13;
-		  
 			switch (event.keyCode) {
-				case ENTER:
+				case keyboard.ENTER:
 					game.togglePause();
 					break;
 			}
