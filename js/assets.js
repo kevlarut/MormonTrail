@@ -5,6 +5,8 @@ var spriteAssets = {
 		'img/handcart1.gif',
 		'img/handcart2.gif'
 	],
+	'buffalo-chip-girl': ['img/buffalo-chip-girl.gif'],
+	'buffalo-chip': ['img/buffalo-chip.gif'],
 	'chimney-rock': ['img/chimney-rock.gif'],
 	'defeat': ['img/defeat.gif'],
 	'echo-canyon': ['img/echo-canyon.gif'],
@@ -21,7 +23,7 @@ var spriteAssets = {
 	'john': ['img/john.gif'],	
 	'alma': ['img/alma.gif'],	
 	'lucy': ['img/lucy.gif'],	
-	'elizabeth': ['img/elizabeth.gif'],	
+	'eliza': ['img/elizabeth.gif'],	
 }
 
 var audioAssets = [

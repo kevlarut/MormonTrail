@@ -84,12 +84,34 @@ var game = new function() {
 		}
 	}
 	
+	var resumeAfterMiniGame = function() {
+		stopAllAudio(); 
+		isPaused = false;
+		
+		window.document.onkeydown = function(event) {
+			switch (event.keyCode) {
+				case keyboard.ENTER:
+					game.togglePause();
+					break;
+			}
+		}
+	}
+	
 	this.gameLoop = function() {
 		if (!isPaused) {
+		
+			if (Math.random() < 0.01) {
+				isPaused = true;	
+				stopAllAudio();				
+				buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
+				return;
+			}
+		
 			var dayAdvancementSpeed = 1 / 10;
 			date.setTime( date.getTime() + 1 * 86400000 * dayAdvancementSpeed );
 		
 			var milesTraveled = Math.round(8.5 * dayAdvancementSpeed);
+			
 			var nextLandmark = landmarks[nextLandmarkIndex];
 			var nextLandmarkMiles = nextLandmark.miles;
 			if (roadometer + milesTraveled >= nextLandmarkMiles) {		
@@ -298,6 +320,7 @@ var game = new function() {
 					start();
 					break;
 				case keyboard.X:
+				case keyboard.SPACE:
 					items[cursor].isSelected = !items[cursor].isSelected;
 					drawBuySuppliesMenu(cursor, items, capacity);
 					break;
@@ -349,7 +372,7 @@ var game = new function() {
 			{ name: 'John', isAdult: false, selected: false }, 
 			{ name: 'Mary', isAdult: false, selected: false }, 
 			{ name: 'Alma', isAdult: false, selected: false }, 
-			{ name: 'Elizabeth', isAdult: false, selected: false }
+			{ name: 'Eliza', isAdult: false, selected: false }
 		];
 		var cursor = 0;
 		var selectedCount = 0;
