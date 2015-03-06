@@ -100,11 +100,17 @@ var game = new function() {
 	this.gameLoop = function() {
 		if (!isPaused) {
 		
-			if (Math.random() < 0.01) {
+			if (Math.random() < 0.005) {
 				isPaused = true;	
 				stopAllAudio();				
 				buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
 				return;
+			}
+			else if (Math.random() < 0.01) {
+				isPaused = true;	
+				stopAllAudio();				
+				huntingMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
+				return;			
 			}
 		
 			var dayAdvancementSpeed = 1 / 10;
@@ -341,6 +347,7 @@ var game = new function() {
 	}
 			
 	this.chooseCharacterNames = function() {
+	
 		stopAllAudio();
 	
 		var partySize = 4;

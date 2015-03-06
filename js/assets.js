@@ -5,10 +5,13 @@ var spriteAssets = {
 		'img/handcart1.gif',
 		'img/handcart2.gif'
 	],
+	'buffalo': ['img/buffalo.gif'],
 	'buffalo-chip-girl': ['img/buffalo-chip-girl.gif'],
 	'buffalo-chip': ['img/buffalo-chip.gif'],
 	'chimney-rock': ['img/chimney-rock.gif'],
 	'defeat': ['img/defeat.gif'],
+	'hunter': ['img/hunter.gif'],
+	
 	'echo-canyon': ['img/echo-canyon.gif'],
 	'emigration-canyon': ['img/emigration-canyon.gif'],
 	'fort-laramie': ['img/fort-laramie.gif'],
@@ -16,6 +19,7 @@ var spriteAssets = {
 	'salt-lake-valley': ['img/salt-lake-valley.gif'],
 	'sugar-creek': ['img/sugar-creek.gif'],
 	'winter-quarters': ['img/winter-quarters.gif'],
+	
 	'brigham': ['img/brigham.gif'],
 	'joseph': ['img/joseph.gif'],
 	'emma': ['img/emma.gif'],
