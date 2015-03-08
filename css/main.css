@@ -1,16 +1,19 @@
 html, body {
+	height: 100%;
 	margin: 0;
 	padding: 0;
 }
 
 body {
-	background: white;
+	background: black;
+	text-align: center;
 }
 
 canvas {
 	background: black;	
-	height: 400px;
-	width: 640px;
+	min-width: 640px;
+	min-height: 400px;
+	height: 100%;	
 }
 
 canvas.dontBlurPixelsWhenScaling {

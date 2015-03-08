@@ -58,8 +58,10 @@ var game = new function() {
 		var loaded = 0;
 	
 		var callback = function() { 
-			if (++loaded > countOfImagesToLoad) {
-				self.chooseCharacterNames();
+			if (++loaded > countOfImagesToLoad) {			
+				splashScreen.start(canvas, context, sprites, function() {
+					self.chooseCharacterNames();					
+				});			
 			}
 		}
 		

@@ -11,6 +11,7 @@ var spriteAssets = {
 	'chimney-rock': ['img/chimney-rock.gif'],
 	'defeat': ['img/defeat.gif'],
 	'hunter': ['img/hunter.gif'],
+	'splash': ['img/splash.gif'],
 	
 	'echo-canyon': ['img/echo-canyon.gif'],
 	'emigration-canyon': ['img/emigration-canyon.gif'],
@@ -37,6 +38,7 @@ var audioAssets = [
 	{ 'src': 'audio/pioneer-children-sang-as-they-walked.mp3' },
 	{ 'src': 'audio/the-handcart-song.mp3' },
 	{ 'src': 'audio/the-oxcart.mp3' },
-	{ 'src': 'audio/to-be-a-pioneer.mp3' }
+	{ 'src': 'audio/to-be-a-pioneer.mp3' },	
+	{ 'src': 'audio/come-all-ye-saints-of-zion.mp3' }
 ];
 	
