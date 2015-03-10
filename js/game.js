@@ -75,7 +75,7 @@ var game = new function() {
 		}
 		
 		background = new scrollingSprite();
-		background.preLoadImages(['img/plains-background.gif'], callback);
+		background.preLoadImages(['img/clouds.gif', 'img/plains-background.gif', 'img/plains-foreground.gif'], callback);
 	}
 	
 	var stopAllAudio = function() {
@@ -216,7 +216,7 @@ var game = new function() {
 					sprites[key].update();
 				}
 			}
-			background.update();
+			background.update();			
 		}
 		
 		self.ensureThatASongIsPlaying();

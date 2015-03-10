@@ -1,5 +1,4 @@
 var spriteAssets = {
-	'plains-background': ['img/plains-background.gif'],
 	'grass': ['img/grass.gif'],
 	'handcart': [
 		'img/handcart1.gif',
