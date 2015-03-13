@@ -1,3 +1,15 @@
+@font-face {
+    font-family: 'Here Lies MECC';
+    src: url('/fonts/mecc-webfont.eot');
+    src: url('/fonts/mecc-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/fonts/mecc-webfont.woff2') format('woff2'),
+         url('/fonts/mecc-webfont.woff') format('woff'),
+         url('/fonts/mecc-webfont.ttf') format('truetype'),
+         url('/fonts/mecc-webfont.svg#Here Lies MECC') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
 html, body {
 	height: 100%;
 	margin: 0;
