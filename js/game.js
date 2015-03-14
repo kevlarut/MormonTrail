@@ -11,7 +11,10 @@ var game = new function() {
 	var isPaused = false;
 	var nextLandmarkIndex = 0;
 	var gameLoopInterval = null;
-	var party = [];
+	var party = [];	
+	var _lastDiseaseEventMile = 0;
+	var _lastHuntingEventMile = 0;
+	var _lastBuffaloEventMile = 0;
 	
 	this.togglePause = function() {
 		isPaused = !isPaused;
@@ -99,20 +102,53 @@ var game = new function() {
 		}
 	}
 	
+	var drawDialogBox = function(message) {				
+		var horizontalCenter = canvas.width / 2;		
+		context.textAlign = 'center';
+		context.fillStyle = 'white';
+		context.fillText(message, horizontalCenter, 105);
+		context.fillText('Press ENTER to continue.', horizontalCenter + 10, 115);
+	}
+	
+	var giveSomeoneADiseaseAndShowADialogBoxAboutIt = function() {
+		var min = 0;
+		var max = party.length;
+		var randomIndex = Math.floor(Math.random() * (max - min)) + min;
+		var person = party[randomIndex];		
+		if (typeof person.disease == 'undefined' || person.disease == null) {		
+			sprites[person.name.toLowerCase()].render(context, 5, 97);
+			person.disease = "mountain fever";
+			drawDialogBox(person.name + ' has ' + person.disease + '.');
+			
+		}
+		else {
+			isPaused = false;
+		}
+	}
+	
 	this.gameLoop = function() {
 		if (!isPaused) {
 		
-			if (Math.random() < 0.005) {
+			var minimumMilesBetweenSameEvent = 10;
+			if (Math.random() < 0.005 && roadometer - _lastBuffaloEventMile >= minimumMilesBetweenSameEvent) {
+				_lastBuffaloEventMile = roadometer;
 				isPaused = true;	
-				stopAllAudio();				
+				stopAllAudio();			
 				buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
 				return;
 			}
-			else if (Math.random() < 0.01) {
+			else if (Math.random() < 0.01 && roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameEvent) {
+				_lastHuntingEventMile = roadometer;
 				isPaused = true;	
 				stopAllAudio();				
 				huntingMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
 				return;			
+			}
+			else if (Math.random() < 1 && roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameEvent) {
+				_lastDiseaseEventMile = roadometer;
+				isPaused = true;
+				giveSomeoneADiseaseAndShowADialogBoxAboutIt();
+				return;
 			}
 		
 			var dayAdvancementSpeed = 1 / 10;
