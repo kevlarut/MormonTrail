@@ -144,7 +144,7 @@ var game = new function() {
 				huntingMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
 				return;			
 			}
-			else if (Math.random() < 1 && roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameEvent) {
+			else if (Math.random() < 0.02 && roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameEvent) {
 				_lastDiseaseEventMile = roadometer;
 				isPaused = true;
 				giveSomeoneADiseaseAndShowADialogBoxAboutIt();
