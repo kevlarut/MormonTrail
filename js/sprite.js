@@ -12,8 +12,8 @@ function sprite() {
 		
 			if (i == 0) {
 				image.onload = function() {
-					self.height = image.height;
-					self.width = image.width;
+					self.height = this.height;
+					self.width = this.width;
 					callback();
 				}
 			}

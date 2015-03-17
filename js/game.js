@@ -126,6 +126,20 @@ var game = new function() {
 		}
 	}
 	
+	var renderHandcartFamily = function() {
+		var x = 225;
+		var y = 43;
+		
+		x -= sprites['handcart'].width;
+		sprites['handcart'].render(context, x, y);
+		for (var i = 0; i < party.length; i++) {
+			if (party[i].name == 'John') {
+				x -= sprites['john-walking'].width;
+				sprites['john-walking'].render(context, x, y);
+			}
+		}
+	}
+	
 	this.gameLoop = function() {
 		if (!isPaused) {
 		
@@ -244,7 +258,7 @@ var game = new function() {
 			context.fillText("Roadometer: " + roadometer + " miles", 10, 150);
 			
 			background.render(context, 0, 10);
-			sprites['handcart'].render(context, 180, 43);
+			renderHandcartFamily();
 			sprites['grass'].render(context, 0, 70);
 			
 			for (var key in sprites) {
