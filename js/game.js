@@ -134,8 +134,12 @@ var game = new function() {
 		sprites['handcart'].render(context, x, y);
 		for (var i = 0; i < party.length; i++) {
 			if (party[i].name == 'John') {
-				x -= sprites['john-walking'].width;
+				x -= sprites['john-walking'].width + 2;
 				sprites['john-walking'].render(context, x, y);
+			}
+			else if (party[i].name == 'Joseph') {
+				x -= sprites['joseph-walking'].width + 2;
+				sprites['joseph-walking'].render(context, x, y);
 			}
 		}
 	}
