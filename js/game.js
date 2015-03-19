@@ -160,25 +160,32 @@ var game = new function() {
 			var milesSinceLastEvent = Math.min(_lastHuntingEventMile, _lastDiseaseEventMile, _lastBuffaloEventMile);
 			
 			if (roadometer - milesSinceLastEvent >= minimumMilesBetweenAnyEvent) {
-				if (Math.random() < 0.005 && roadometer - _lastBuffaloEventMile >= minimumMilesBetweenSameEvent) {
-					_lastBuffaloEventMile = roadometer;
-					isPaused = true;	
-					stopAllAudio();			
-					buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
-					return;
+				var randomNumber = Math.random();
+				if (randomNumber < 0.005) {
+					if (roadometer - _lastBuffaloEventMile >= minimumMilesBetweenSameEvent) {
+						_lastBuffaloEventMile = roadometer;
+						isPaused = true;	
+						stopAllAudio();			
+						buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
+						return;
+					}
 				}
-				else if (Math.random() < 0.01 && roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameEvent) {
-					_lastHuntingEventMile = roadometer;
-					isPaused = true;	
-					stopAllAudio();				
-					huntingMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
-					return;			
+				else if (randomNumber < 0.01) {
+					if (roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameEvent) {
+						_lastHuntingEventMile = roadometer;
+						isPaused = true;	
+						stopAllAudio();				
+						huntingMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
+						return;			
+					}
 				}
-				else if (Math.random() < 0.02 && roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameEvent) {
-					_lastDiseaseEventMile = roadometer;
-					isPaused = true;
-					giveSomeoneADiseaseAndShowADialogBoxAboutIt();
-					return;
+				else if (randomNumber < 0.02) {
+					if (roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameEvent) {
+						_lastDiseaseEventMile = roadometer;
+						isPaused = true;
+						giveSomeoneADiseaseAndShowADialogBoxAboutIt();
+						return;
+					}
 				}
 			}
 		
