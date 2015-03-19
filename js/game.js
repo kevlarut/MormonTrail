@@ -127,13 +127,21 @@ var game = new function() {
 	}
 	
 	var renderHandcartFamily = function() {
-		var x = 225;
+		var x = 270;
 		var y = 43;
 		
 		x -= sprites['handcart'].width;
 		sprites['handcart'].render(context, x, y);
 		for (var i = 0; i < party.length; i++) {
-			if (party[i].name == 'John') {
+			if (party[i].name == 'Alma') {
+				x -= sprites['alma-walking'].width + 2;
+				sprites['alma-walking'].render(context, x, y);
+			}
+			else if (party[i].name == 'Eliza') {
+				x -= sprites['eliza-walking'].width + 2;
+				sprites['eliza-walking'].render(context, x, y);
+			}
+			else if (party[i].name == 'John') {
 				x -= sprites['john-walking'].width + 2;
 				sprites['john-walking'].render(context, x, y);
 			}
@@ -148,25 +156,30 @@ var game = new function() {
 		if (!isPaused) {
 		
 			var minimumMilesBetweenSameEvent = 10;
-			if (Math.random() < 0.005 && roadometer - _lastBuffaloEventMile >= minimumMilesBetweenSameEvent) {
-				_lastBuffaloEventMile = roadometer;
-				isPaused = true;	
-				stopAllAudio();			
-				buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
-				return;
-			}
-			else if (Math.random() < 0.01 && roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameEvent) {
-				_lastHuntingEventMile = roadometer;
-				isPaused = true;	
-				stopAllAudio();				
-				huntingMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
-				return;			
-			}
-			else if (Math.random() < 0.02 && roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameEvent) {
-				_lastDiseaseEventMile = roadometer;
-				isPaused = true;
-				giveSomeoneADiseaseAndShowADialogBoxAboutIt();
-				return;
+			var minimumMilesBetweenAnyEvent = 1;
+			var milesSinceLastEvent = Math.min(_lastHuntingEventMile, _lastDiseaseEventMile, _lastBuffaloEventMile);
+			
+			if (roadometer - milesSinceLastEvent >= minimumMilesBetweenAnyEvent) {
+				if (Math.random() < 0.005 && roadometer - _lastBuffaloEventMile >= minimumMilesBetweenSameEvent) {
+					_lastBuffaloEventMile = roadometer;
+					isPaused = true;	
+					stopAllAudio();			
+					buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
+					return;
+				}
+				else if (Math.random() < 0.01 && roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameEvent) {
+					_lastHuntingEventMile = roadometer;
+					isPaused = true;	
+					stopAllAudio();				
+					huntingMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
+					return;			
+				}
+				else if (Math.random() < 0.02 && roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameEvent) {
+					_lastDiseaseEventMile = roadometer;
+					isPaused = true;
+					giveSomeoneADiseaseAndShowADialogBoxAboutIt();
+					return;
+				}
 			}
 		
 			var dayAdvancementSpeed = 1 / 10;

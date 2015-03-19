@@ -2,9 +2,11 @@ var buffaloChipsMiniGame = new function() {
 
 	var _canvas = null;
 	var _context = null;
-	var _sprites = null;
+	var _sprites = null;	
+	var _girl = null;
 	
 	var _self = this;
+	var _animationInterval = null;
 	var _timerInterval = null;
 	var _callback = null;
 	
@@ -28,7 +30,7 @@ var buffaloChipsMiniGame = new function() {
 			_sprites['buffalo-chip'].render(_context, chip.x, chip.y);
 		}
 		
-		_sprites['buffalo-chip-girl'].render(_context, x, y);
+		_girl.render(_context, x, y);
 		
 		_context.textAlign = 'right';
 		_context.font = "8px 'Here Lies MECC'";
@@ -55,8 +57,8 @@ var buffaloChipsMiniGame = new function() {
 	var detectBuffaloChipCollision = function(girlX, girlY, chips) {
 		var chipHeight = 6;
 		var chipWidth = 6;
-		var girlHeight = 17;
-		var girlWidth = 9;
+		var girlHeight = _girl.height;
+		var girlWidth = _girl.width;
 		for (var i = 0; i < chips.length; i++) {
 			var chip = chips[i];
 			if (girlX + girlWidth >= chip.x && girlX <= chip.x + chipWidth 
@@ -71,9 +73,14 @@ var buffaloChipsMiniGame = new function() {
 		timeRemaining = 10;
 		chips = [];
 		score = 0;
+		clearInterval(_animationInterval);
 		clearInterval(_timerInterval);
 		window.document.onkeydown = null;
 		_callback();
+	}
+	
+	this.updateAnimations = function() {
+		_girl.update();
 	}
 	
 	this.reduceTime = function() {
@@ -90,6 +97,7 @@ var buffaloChipsMiniGame = new function() {
 		_context = context;
 		_sprites = sprites;
 		_callback = callback;
+		_girl = _sprites['eliza-walking'];
 	
 		var WOAH_HAW_BUCK_AND_JERRY_BOY = 1;
 		var song = audioAssets[WOAH_HAW_BUCK_AND_JERRY_BOY];
@@ -126,7 +134,7 @@ var buffaloChipsMiniGame = new function() {
 		window.document.onkeydown = function(event) {
 			switch (event.keyCode) {
 				case keyboard.ENTER:
-					play();
+					play(canvas, context, sprites, audioAssets, callback);
 					break;				
 			}
 		}
@@ -134,14 +142,15 @@ var buffaloChipsMiniGame = new function() {
 	
 	var play = function(canvas, context, sprites, audioAssets, callback) {
 		
+		_animationInterval = setInterval(function() { _self.updateAnimations(); }, 100);
 		_timerInterval = setInterval(function() { _self.reduceTime(); }, 1000);
 		
 		var horizontalCenter = _canvas.width / 2;
 		var verticalCenter = _canvas.height / 2;
 		
 		var speed = 2;
-		var girlHeight = 17;
-		var girlWidth = 9;
+		var girlHeight = sprites['eliza-walking'].height;
+		var girlWidth = sprites['eliza-walking'].width;
 		x = horizontalCenter - Math.floor(girlWidth / 2);
 		y = verticalCenter - Math.floor(girlHeight / 2);
 		

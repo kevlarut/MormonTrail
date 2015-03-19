@@ -11,7 +11,6 @@ var spriteAssets = {
 		'img/seagull-4.gif'
 	],
 	'buffalo': ['img/buffalo.gif'],
-	'buffalo-chip-girl': ['img/buffalo-chip-girl.gif'],
 	'buffalo-chip': ['img/buffalo-chip.gif'],
 	'chimney-rock': ['img/chimney-rock.gif'],
 	'defeat': ['img/defeat.gif'],
@@ -26,6 +25,11 @@ var spriteAssets = {
 	'sugar-creek': ['img/sugar-creek.gif'],
 	'winter-quarters': ['img/winter-quarters.gif'],
 	
+	'alma': ['img/alma.gif'],	
+	'alma-walking': [
+		'img/alma-walking-1.gif', 
+		'img/alma-walking-2.gif'
+	],
 	'brigham': ['img/brigham.gif'],
 	'joseph': ['img/joseph.gif'],
 	'joseph-walking': [
@@ -39,9 +43,12 @@ var spriteAssets = {
 		'img/john-walking-1.gif', 
 		'img/john-walking-2.gif'
 	],
-	'alma': ['img/alma.gif'],	
 	'lucy': ['img/lucy.gif'],	
-	'eliza': ['img/elizabeth.gif'],	
+	'eliza': ['img/eliza.gif'],	
+	'eliza-walking': [
+		'img/eliza-walking-1.gif', 
+		'img/eliza-walking-2.gif'
+	],
 }
 
 var audioAssets = [
