@@ -118,12 +118,21 @@ var game = new function() {
 		if (typeof person.disease == 'undefined' || person.disease == null) {		
 			sprites[person.name.toLowerCase()].render(context, 5, 97);
 			person.disease = "mountain fever";
-			drawDialogBox(person.name + ' has ' + person.disease + '.');
-			
+			drawDialogBox(person.name + ' has ' + person.disease + '.');			
 		}
 		else {
 			isPaused = false;
 		}
+	}
+	
+	var isAnyoneSick = function() {
+		for (var i = 0; i < party.length; i++) {
+			var person = party[i];
+			if (typeof(person.disease) !== 'undefined' && person.disease !== null) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	var renderHandcartFamily = function() {
@@ -192,7 +201,13 @@ var game = new function() {
 			var dayAdvancementSpeed = 1 / 10;
 			date.setTime( date.getTime() + 1 * 86400000 * dayAdvancementSpeed );
 		
-			var milesTraveled = Math.round(8.5 * dayAdvancementSpeed);
+			var milesTravelledPerDay = 8.5;
+			if (isAnyoneSick()) {
+				milesTravelledPerDay /= 3;
+				console.log(milesTravelledPerDay);
+			}
+		
+			var milesTraveled = milesTravelledPerDay * dayAdvancementSpeed;
 			
 			var nextLandmark = landmarks[nextLandmarkIndex];
 			var nextLandmarkMiles = nextLandmark.miles;
@@ -279,7 +294,7 @@ var game = new function() {
 			context.font = "8px 'Here Lies MECC'";
 			context.fillStyle = 'black';
 			context.fillText("Date: " + date.toDateString(), 10, 140);
-			context.fillText("Roadometer: " + roadometer + " miles", 10, 150);
+			context.fillText("Roadometer: " + Math.round(roadometer) + " miles", 10, 150);
 			
 			background.render(context, 0, 10);
 			renderHandcartFamily();
