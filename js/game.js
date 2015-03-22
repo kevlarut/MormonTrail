@@ -1,5 +1,6 @@
 var game = new function() {
 
+	var food = 0;
 	var canvas = null;
 	var context = null;
 	var frameRate = 3;
@@ -201,10 +202,23 @@ var game = new function() {
 			var dayAdvancementSpeed = 1 / 10;
 			date.setTime( date.getTime() + 1 * 86400000 * dayAdvancementSpeed );
 		
+			var poundsOfFoodPerAdultPerDay = 2;
+			var poundsOfFoodPerChildPerDay = poundsOfFoodPerAdultPerDay / 2;
+			var partyFoodEatenPerDay = 0;
+			for (var i = 0; i < party.length; i++) {
+				var person = party[i];
+				if (person.isAdult) {
+					partyFoodEatenPerDay += poundsOfFoodPerAdultPerDay;
+				}
+				else {
+					partyFoodEatenPerDay += poundsOfFoodPerChildPerDay;
+				}
+			}
+			food -= partyFoodEatenPerDay * dayAdvancementSpeed;
+		
 			var milesTravelledPerDay = 8.5;
 			if (isAnyoneSick()) {
 				milesTravelledPerDay /= 3;
-				console.log(milesTravelledPerDay);
 			}
 		
 			var milesTraveled = milesTravelledPerDay * dayAdvancementSpeed;
@@ -291,10 +305,11 @@ var game = new function() {
 			context.fill();
 			
 			context.textAlign = 'left';
-			context.font = "8px 'Here Lies MECC'";
+			context.font = '8px "Here Lies MECC"';
 			context.fillStyle = 'black';
-			context.fillText("Date: " + date.toDateString(), 10, 140);
-			context.fillText("Roadometer: " + Math.round(roadometer) + " miles", 10, 150);
+			context.fillText('Date: ' + date.toDateString(), 10, 140);
+			context.fillText('Roadometer: ' + Math.round(roadometer) + ' miles', 10, 150);
+			context.fillText('Food: ' + Math.round(food) + ' pounds', 10, 160);
 			
 			background.render(context, 0, 10);
 			renderHandcartFamily();
@@ -315,7 +330,7 @@ var game = new function() {
 	
 		context.clearRect(0, 15, canvas.width, 100);
 		
-		var food = capacity;
+		food = capacity;
 	
 		var line = 0;
 		for (line = 0; line < items.length; line++) {
