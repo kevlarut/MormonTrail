@@ -16,6 +16,7 @@ var game = new function() {
 	var _lastDiseaseEventMile = 0;
 	var _lastHuntingEventMile = 0;
 	var _lastBuffaloEventMile = 0;
+	var _lastStarvationEventMile = 0;
 	
 	this.togglePause = function() {
 		isPaused = !isPaused;
@@ -111,15 +112,36 @@ var game = new function() {
 		context.fillText('Press ENTER to continue.', horizontalCenter + 10, 115);
 	}
 	
+	var showMessageForPerson = function(personName, message) {		
+		sprites[personName.toLowerCase()].render(context, 5, 97);
+		drawDialogBox(message);
+	}
+	
 	var giveSomeoneADiseaseAndShowADialogBoxAboutIt = function() {
 		var min = 0;
 		var max = party.length;
 		var randomIndex = Math.floor(Math.random() * (max - min)) + min;
-		var person = party[randomIndex];		
-		if (typeof person.disease == 'undefined' || person.disease == null) {		
-			sprites[person.name.toLowerCase()].render(context, 5, 97);
-			person.disease = "mountain fever";
-			drawDialogBox(person.name + ' has ' + person.disease + '.');			
+		var person = party[randomIndex];
+		if (typeof person.disease == 'undefined' || person.disease == null) {
+			var personName = person.name;
+			var message = personName + ' has ' + person.disease + '.';
+			showMessageForPerson(personName, message);			
+		}
+		else {
+			isPaused = false;
+		}
+	}
+	
+	var starveSomeone = function() {	
+		var min = 0;
+		var max = party.length;
+		var randomIndex = Math.floor(Math.random() * (max - min)) + min;
+		var person = party[randomIndex];
+		if (typeof person.isStarving === 'undefined' || !person.isStarving) {
+			person.isStarving = true;
+			var personName = person.name;
+			var message = personName + ' is starving.';
+			showMessageForPerson(personName, message);	
 		}
 		else {
 			isPaused = false;
@@ -130,6 +152,16 @@ var game = new function() {
 		for (var i = 0; i < party.length; i++) {
 			var person = party[i];
 			if (typeof(person.disease) !== 'undefined' && person.disease !== null) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	var isAnyoneStarving = function() {
+		for (var i = 0; i < party.length; i++) {
+			var person = party[i];
+			if (person.isStarving) {
 				return true;
 			}
 		}
@@ -215,10 +247,22 @@ var game = new function() {
 				}
 			}
 			food -= partyFoodEatenPerDay * dayAdvancementSpeed;
+			if (food < 0) {
+				food = 0;
+				if (roadometer - _lastStarvationEventMile >= minimumMilesBetweenSameEvent) {
+					_lastStarvationEventMile = roadometer;
+					isPaused = true;
+					starveSomeone();
+					return;
+				}
+			}
 		
 			var milesTravelledPerDay = 8.5;
 			if (isAnyoneSick()) {
 				milesTravelledPerDay /= 3;
+			}
+			if (isAnyoneStarving()) {
+				milesTravelledPerDay /= 2;
 			}
 		
 			var milesTraveled = milesTravelledPerDay * dayAdvancementSpeed;
