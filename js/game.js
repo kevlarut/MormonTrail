@@ -123,6 +123,7 @@ var game = new function() {
 		var randomIndex = Math.floor(Math.random() * (max - min)) + min;
 		var person = party[randomIndex];
 		if (typeof person.disease == 'undefined' || person.disease == null) {
+			person.disease = "mountain fever";
 			var personName = person.name;
 			var message = personName + ' has ' + person.disease + '.';
 			showMessageForPerson(personName, message);			
