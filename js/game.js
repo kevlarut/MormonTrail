@@ -17,6 +17,7 @@ var game = new function() {
 	var _lastHuntingEventMile = 0;
 	var _lastBuffaloEventMile = 0;
 	var _lastStarvationEventMile = 0;
+	var futureEvents = [];
 	
 	this.togglePause = function() {
 		isPaused = !isPaused;
@@ -112,20 +113,92 @@ var game = new function() {
 		context.fillText('Press ENTER to continue.', horizontalCenter + 10, 115);
 	}
 	
-	var showMessageForPerson = function(personName, message) {		
+	var showMessageForPerson = function(personName, message) {	
+
+		context.clearRect(0, 95, canvas.width, 20);	
 		sprites[personName.toLowerCase()].render(context, 5, 97);
 		drawDialogBox(message);
 	}
 	
-	var giveSomeoneADiseaseAndShowADialogBoxAboutIt = function() {
+	var setFutureEvent = function(daysInFuture, delegate) {
+		var futureDate = new Date();
+		futureDate.setTime( date.getTime() + daysInFuture * 86400000 );
+		
+		futureEvents.push({
+			date: futureDate, 
+			action: delegate
+		});
+	}
+	
+	var gameOver = function() {	
+		clearInterval(gameLoopInterval);
+		window.document.onkeydown = null;
+		date = new Date(1847, 4, 5);
+		roadometer = 0;
+		isPaused = false;
+		nextLandmarkIndex = 0;
+	
+		self.chooseCharacterNames();
+	}
+	
+	var killPerson = function(person) {	
+		for (var i = 0; i < party.length; i++) {
+			if (party[i] == person) {
+				party.splice(i, 1);
+			}
+		}
+		
+		if (party.length == 0) {
+			gameOver();
+		}
+	}
+	
+	var resolveDisease = function(person, disease) {
+		if (Math.random() < disease.chanceOfDeath) {
+			var personName = person.name;
+			var message = personName + ' has died.';
+			showMessageForPerson(personName, message);
+			isPaused = true;
+			killPerson(person);
+		}
+		else {
+			person.disease = null;
+			var personName = person.name;
+			var message = personName + ' has been cured of ' + rockyMountainFever.name + '.';
+			showMessageForPerson(personName, message);
+			isPaused = true;
+		}
+	}
+	
+	var resolveStarvation = function(person) {
+		if (person.isStarving) {
+			var personName = person.name;
+			var message = personName + ' has died.';
+			showMessageForPerson(personName, message);
+			isPaused = true;
+			killPerson(person);
+		}
+	}
+	
+	var giveSomeoneADiseaseAndShowADialogBoxAboutIt = function() {	
+	
+		var rockyMountainFever = {
+			name: 'mountain fever',
+			duration: 14,
+			chanceOfDeath: 0.225
+		};
+	
 		var min = 0;
 		var max = party.length;
 		var randomIndex = Math.floor(Math.random() * (max - min)) + min;
 		var person = party[randomIndex];
 		if (typeof person.disease == 'undefined' || person.disease == null) {
-			person.disease = "mountain fever";
+			person.disease = rockyMountainFever;
+			setFutureEvent(rockyMountainFever.duration, function() {				
+				resolveDisease(person, rockyMountainFever);
+			});
 			var personName = person.name;
-			var message = personName + ' has ' + person.disease + '.';
+			var message = personName + ' has ' + rockyMountainFever.name + '.';
 			showMessageForPerson(personName, message);			
 		}
 		else {
@@ -134,12 +207,16 @@ var game = new function() {
 	}
 	
 	var starveSomeone = function() {	
+		var starvationDuration = 7;
 		var min = 0;
 		var max = party.length;
 		var randomIndex = Math.floor(Math.random() * (max - min)) + min;
 		var person = party[randomIndex];
 		if (typeof person.isStarving === 'undefined' || !person.isStarving) {
 			person.isStarving = true;
+			setFutureEvent(starvationDuration, function() {				
+				resolveStarvation(person);
+			});
 			var personName = person.name;
 			var message = personName + ' is starving.';
 			showMessageForPerson(personName, message);	
@@ -198,14 +275,24 @@ var game = new function() {
 	this.gameLoop = function() {
 		if (!isPaused) {
 		
-			var minimumMilesBetweenSameEvent = 10;
+			for (var i = futureEvents.length - 1; i >= 0; i--) {
+				var event = futureEvents[i];
+				if (event.date <= date) {
+					event.action();
+					futureEvents.splice(i, 1);
+					return;
+				}
+			}
+			
+			var minimumMilesBetweenStarvationEvent = 1;
+			var minimumMilesBetweenSameRandomEvent = 10;
 			var minimumMilesBetweenAnyEvent = 1;
 			var milesSinceLastEvent = Math.min(_lastHuntingEventMile, _lastDiseaseEventMile, _lastBuffaloEventMile);
 			
 			if (roadometer - milesSinceLastEvent >= minimumMilesBetweenAnyEvent) {
 				var randomNumber = Math.random();
 				if (randomNumber < 0.005) {
-					if (roadometer - _lastBuffaloEventMile >= minimumMilesBetweenSameEvent) {
+					if (roadometer - _lastBuffaloEventMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastBuffaloEventMile = roadometer;
 						isPaused = true;	
 						stopAllAudio();			
@@ -214,7 +301,7 @@ var game = new function() {
 					}
 				}
 				else if (randomNumber < 0.01) {
-					if (roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameEvent) {
+					if (roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastHuntingEventMile = roadometer;
 						isPaused = true;	
 						stopAllAudio();				
@@ -223,7 +310,7 @@ var game = new function() {
 					}
 				}
 				else if (randomNumber < 0.02) {
-					if (roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameEvent) {
+					if (roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastDiseaseEventMile = roadometer;
 						isPaused = true;
 						giveSomeoneADiseaseAndShowADialogBoxAboutIt();
@@ -234,7 +321,7 @@ var game = new function() {
 		
 			var dayAdvancementSpeed = 1 / 10;
 			date.setTime( date.getTime() + 1 * 86400000 * dayAdvancementSpeed );
-		
+				
 			var poundsOfFoodPerAdultPerDay = 2;
 			var poundsOfFoodPerChildPerDay = poundsOfFoodPerAdultPerDay / 2;
 			var partyFoodEatenPerDay = 0;
@@ -250,7 +337,7 @@ var game = new function() {
 			food -= partyFoodEatenPerDay * dayAdvancementSpeed;
 			if (food < 0) {
 				food = 0;
-				if (roadometer - _lastStarvationEventMile >= minimumMilesBetweenSameEvent) {
+				if (roadometer - _lastStarvationEventMile >= minimumMilesBetweenStarvationEvent) {
 					_lastStarvationEventMile = roadometer;
 					isPaused = true;
 					starveSomeone();
@@ -308,18 +395,11 @@ var game = new function() {
 						song.element.play();
 					}
 					
-					clearInterval(gameLoopInterval);
 					window.document.onkeydown = null;
 					window.document.onkeydown = function(event) {		  
 						switch (event.keyCode) {
-							case keyboard.ENTER:			
-								window.document.onkeydown = null;
-								date = new Date(1847, 4, 5);
-								roadometer = 0;
-								isPaused = false;
-								nextLandmarkIndex = 0;
-							
-								self.chooseCharacterNames();
+							case keyboard.ENTER:	
+								gameOver();
 								break;
 						}
 					}			
@@ -629,6 +709,7 @@ var game = new function() {
 	}
 	
 	this.init = function() {
+		isPaused = false;
 		canvas = document.getElementById('game');		
 		context = canvas.getContext('2d');
 		showLoadingScreen();				
