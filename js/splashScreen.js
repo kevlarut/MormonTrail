@@ -11,6 +11,8 @@ var splashScreen = new function() {
 		context.fill();
 				
 		var horizontalCenter = canvas.width / 2;
+		context.font = "8px 'Here Lies MECC'";
+		context.textAlign = 'center';
 		context.fillStyle = 'white';
 		context.fillText("Press ENTER to start a new game", horizontalCenter, 180);
 		

@@ -46,7 +46,7 @@ var game = new function() {
 		}
 	}
 	
-	this.preLoadAudio = function() {
+	var preLoadAudio = function() {
 		for (var key in audioAssets) {		
 			if (audioAssets.hasOwnProperty(key)) {
 				var audioAsset = audioAssets[key];
@@ -58,16 +58,17 @@ var game = new function() {
 		}
 	}
 	
-	this.preLoadImages = function() {
+	var preLoadImages = function() {
 	
 		var countOfImagesToLoad = Object.keys(spriteAssets).length + 1;
 		var loaded = 0;
 	
 		var callback = function() { 
-			if (++loaded > countOfImagesToLoad) {			
+			if (++loaded >= countOfImagesToLoad) {
+				loadingScreen.end();
 				splashScreen.start(canvas, context, sprites, function() {
 					self.chooseCharacterNames();					
-				});			
+				});
 			}
 		}
 		
@@ -711,10 +712,10 @@ var game = new function() {
 	this.init = function() {
 		isPaused = false;
 		canvas = document.getElementById('game');		
-		context = canvas.getContext('2d');
-		showLoadingScreen();				
-		this.preLoadAudio();
-		this.preLoadImages();
+		context = canvas.getContext('2d');		
+		loadingScreen.start(canvas, context, sprites);	
+		preLoadAudio();
+		preLoadImages();
 	}
 	
 	var start = function() {
@@ -728,15 +729,6 @@ var game = new function() {
 		}
 		self.gameLoop();
 		gameLoopInterval = setInterval(self.gameLoop, 1000 / frameRate);	
-	}
-	
-	var showLoadingScreen = function() {
-		context.clearRect(0, 0, canvas.width, canvas.height);
-		context.textAlign = 'center';
-		context.font = "8px 'Here Lies MECC'";
-		context.fillStyle = 'white';		
-		var horizontalCenter = canvas.width / 2;
-		context.fillText("Loading...", horizontalCenter, 80);
 	}
 }
 

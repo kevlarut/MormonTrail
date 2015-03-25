@@ -1,10 +1,20 @@
 function sprite() {
 	this.animationIndex = 0;
-	this.frameImages = [];
 	this.height = 0;
-	this.width = 0;
+	this.width = 0;	
+	this.frameImages = [];
+	this.framesLoaded = 0;	
 	
 	var self = this;
+	
+	this.hasLoaded = function() {
+		if (self.framesLoaded == self.frameImages.length) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 	
 	this.preLoadImages = function(frameSources, callback) {
 		for (var i = 0; i < frameSources.length; i++) {		
@@ -14,15 +24,19 @@ function sprite() {
 				image.onload = function() {
 					self.height = this.height;
 					self.width = this.width;
+					self.framesLoaded++;
 					callback();
 				}
 			}
 			else {			
-				image.onload = callback;
+				image.onload = function() {
+					self.framesLoaded++;
+					callback;
+				}
 			}
 			
 			image.src = frameSources[i];
-			this.frameImages.push(image);
+			self.frameImages.push(image);
 		}
 	}
 }

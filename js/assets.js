@@ -1,14 +1,14 @@
 var spriteAssets = {
-	'grass': ['img/grass.gif'],
-	'handcart': [
-		'img/handcart1.gif',
-		'img/handcart2.gif'
-	],
 	'seagull': [
 		'img/seagull-1.gif',
 		'img/seagull-2.gif',
 		'img/seagull-3.gif',
 		'img/seagull-4.gif'
+	],
+	'grass': ['img/grass.gif'],
+	'handcart': [
+		'img/handcart1.gif',
+		'img/handcart2.gif'
 	],
 	'buffalo': ['img/buffalo.gif'],
 	'buffalo-chip': ['img/buffalo-chip.gif'],
