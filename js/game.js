@@ -270,6 +270,10 @@ var game = new function() {
 				x -= sprites['joseph-walking'].width + 2;
 				sprites['joseph-walking'].render(context, x, y);
 			}
+			else if (party[i].name == 'Mary') {
+				x -= sprites['mary-walking'].width + 2;
+				sprites['mary-walking'].render(context, x, y);
+			}
 		}
 	}
 	
