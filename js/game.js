@@ -262,6 +262,10 @@ var game = new function() {
 				x -= sprites['eliza-walking'].width + 2;
 				sprites['eliza-walking'].render(context, x, y);
 			}
+			else if (party[i].name == 'Emma') {
+				x -= sprites['emma-walking'].width + 2;
+				sprites['emma-walking'].render(context, x, y);
+			}
 			else if (party[i].name == 'John') {
 				x -= sprites['john-walking'].width + 2;
 				sprites['john-walking'].render(context, x, y);

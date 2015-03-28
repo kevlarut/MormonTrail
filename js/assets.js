@@ -37,6 +37,10 @@ var spriteAssets = {
 		'img/joseph-walking-2.gif'
 	],
 	'emma': ['img/emma.gif'],
+	'emma-walking': [
+		'img/emma-walking-1.gif',
+		'img/emma-walking-2.gif',
+	],
 	'mary': ['img/mary.gif'],
 	'mary-walking': [
 		'img/mary-walking-1.gif',
