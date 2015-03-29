@@ -251,12 +251,14 @@ var game = new function() {
 		var x = 270;
 		var y = 43;
 		
-		x -= sprites['handcart'].width;
-		sprites['handcart'].render(context, x, y);
 		for (var i = 0; i < party.length; i++) {
 			if (party[i].name == 'Alma') {
 				x -= sprites['alma-walking'].width + 2;
 				sprites['alma-walking'].render(context, x, y);
+			}
+			else if (party[i].name == 'Brigham') {
+				x -= sprites['brigham-walking'].width + 2;
+				sprites['brigham-walking'].render(context, x, y);
 			}
 			else if (party[i].name == 'Eliza') {
 				x -= sprites['eliza-walking'].width + 2;

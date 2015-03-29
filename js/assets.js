@@ -6,10 +6,6 @@ var spriteAssets = {
 		'img/seagull-4.gif'
 	],
 	'grass': ['img/grass.gif'],
-	'handcart': [
-		'img/handcart1.gif',
-		'img/handcart2.gif'
-	],
 	'buffalo': ['img/buffalo.gif'],
 	'buffalo-chip': ['img/buffalo-chip.gif'],
 	'chimney-rock': ['img/chimney-rock.gif'],
@@ -31,6 +27,10 @@ var spriteAssets = {
 		'img/alma-walking-2.gif'
 	],
 	'brigham': ['img/brigham.gif'],
+	'brigham-walking': [
+		'img/brigham-walking-1.gif', 
+		'img/brigham-walking-2.gif'
+	],
 	'joseph': ['img/joseph.gif'],
 	'joseph-walking': [
 		'img/joseph-walking-1.gif', 
