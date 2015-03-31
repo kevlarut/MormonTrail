@@ -106,19 +106,19 @@ var game = new function() {
 		}
 	}
 	
-	var drawDialogBox = function(message) {				
-		var horizontalCenter = canvas.width / 2;		
+	var drawDialogBoxBesidePortrait = function(message) {
+		var spaceTakenUpByPortrait = 25;
+		var horizontalCenter = ((canvas.width - spaceTakenUpByPortrait) / 2) + spaceTakenUpByPortrait;
 		context.textAlign = 'center';
 		context.fillStyle = 'white';
 		context.fillText(message, horizontalCenter, 105);
-		context.fillText('Press ENTER to continue.', horizontalCenter + 10, 115);
+		context.fillText('Press ENTER to continue.', horizontalCenter, 115);
 	}
 	
-	var showMessageForPerson = function(personName, message) {	
-
+	var showMessageForPerson = function(personName, message) {
 		context.clearRect(0, 95, canvas.width, 20);	
 		sprites[personName.toLowerCase()].render(context, 5, 97);
-		drawDialogBox(message);
+		drawDialogBoxBesidePortrait(message);
 	}
 	
 	var setFutureEvent = function(daysInFuture, delegate) {
@@ -157,7 +157,7 @@ var game = new function() {
 	var resolveDisease = function(person, disease) {
 		if (Math.random() < disease.chanceOfDeath) {
 			var personName = person.name;
-			var message = personName + ' has died.';
+			var message = personName + ' has died of disease.';
 			showMessageForPerson(personName, message);
 			isPaused = true;
 			killPerson(person);
@@ -165,7 +165,7 @@ var game = new function() {
 		else {
 			person.disease = null;
 			var personName = person.name;
-			var message = personName + ' has been cured of ' + rockyMountainFever.name + '.';
+			var message = personName + ' is no longer sick.';
 			showMessageForPerson(personName, message);
 			isPaused = true;
 		}
