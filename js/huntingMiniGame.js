@@ -7,8 +7,10 @@ var huntingMiniGame = new function() {
 	var _self = this;
 	var _timerInterval = null;
 	var _callback = null;
-	var _buffaloSprite = null
+	var _buffaloSprite = null;
 	var _capacity = 0;
+	
+	var bullets = [];
 	
 	var x = 0, 
 		y = 0, 
@@ -19,8 +21,7 @@ var huntingMiniGame = new function() {
 	var DEFAULT_TIME_REMAINING = 10;
 	var timeRemaining = DEFAULT_TIME_REMAINING;
 	
-	var render = function() {
-	
+	var render = function() {	
 		_context.clearRect(0, 0, _canvas.width, _canvas.height);
 		
 		_context.beginPath();
@@ -29,8 +30,17 @@ var huntingMiniGame = new function() {
 		_context.fill();
 		
 		for (var i = 0; i < animals.length; i++) {
-			var chip = animals[i];
-			_buffaloSprite.render(_context, chip.x, chip.y);
+			var animal = animals[i];
+			_buffaloSprite.render(_context, animal.x, animal.y);
+		}
+		
+		for (var i = 0; i < bullets.length; i++) {
+			var bullet = bullets[i];
+				
+			_context.beginPath();
+			_context.rect(bullet.x, bullet.y, 2, 2);
+			_context.fillStyle = 'white';
+			_context.fill();
 		}
 		
 		_hunterSprite.render(_context, x, y);
@@ -71,11 +81,19 @@ var huntingMiniGame = new function() {
 		var animalWidth = _buffaloSprite.width;
 		var hunterHeight = _hunterSprite.height;
 		var hunterWidth = _hunterSprite.width;
+		var bulletWidth = 2;
+		var bulletHeight = 2;
+		var animalHitBoxMargin = 3;
 		for (var i = 0; i < animals.length; i++) {
-			var chip = animals[i];
-			if (x + hunterWidth >= chip.x && x <= chip.x + animalWidth 
-				&& y + hunterHeight >= chip.y && y <= chip.y + animalHeight) {
-				handleCollision(i);
+			var animal = animals[i];
+			for (var j = bullets.length - 1; j >= 0; j--) {
+				var bullet = bullets[j];
+				if (bullet.x + bulletWidth >= animal.x + animalHitBoxMargin && bullet.x <= animal.x + animalWidth - animalHitBoxMargin * 2
+					&& bullet.y + bulletHeight >= animal.y + animalHitBoxMargin && bullet.y <= animal.y + animalHeight - animalHitBoxMargin * 2) {
+					bullets.splice(j, 1);
+					handleCollision(i);
+					break;
+				}
 			}
 		}
 		return null;
@@ -131,14 +149,20 @@ var huntingMiniGame = new function() {
 		}
 	}
 	
-	this.update = function() {
-	
+	this.update = function() {		
 		if (Math.random() < 0.03) {
 			animals.push(spawnAnimal());
-		}
-	
+		}	
 		for (var i = 0; i < animals.length; i++) {
 			animals[i].x += animals[i].speed;
+		}
+		var bulletSpeed = 8;
+		for (var i = bullets.length - 1; i >= 0; i--) {
+			var bullet = bullets[i];
+			bullet.x -= bulletSpeed;
+			if (bullet.x < 0) {
+				bullets.splice(i, 1);
+			}
 		}
 		detectCollision();
 	
@@ -195,6 +219,13 @@ var huntingMiniGame = new function() {
 		}
 	}
 	
+	var spawnBullet = function(x, y) {
+		bullets.push({
+			x: x,
+			y: y
+		});
+	}
+	
 	var play = function(canvas, context, sprites, audioAssets, callback) {		
 		_timerInterval = setInterval(function() { 
 			_self.update(); 
@@ -240,6 +271,9 @@ var huntingMiniGame = new function() {
 						detectCollision();
 						render();
 					}
+					break;
+				case keyboard.SPACE:
+					spawnBullet(x, y + 6);
 					break;
 			}
 		}
