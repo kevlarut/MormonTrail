@@ -719,6 +719,7 @@ var game = new function() {
 					break;
 			}
 		}
+		window.document.onclick = null;
 	}
 	
 	var drawCharacterMenu = function(cursor, names) {

@@ -31,5 +31,8 @@ var splashScreen = new function() {
 					break;
 			}
 		}
+		window.document.onclick = function(event) {
+			callback();
+		}
 	}
 }
