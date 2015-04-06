@@ -719,7 +719,6 @@ var game = new function() {
 					break;
 			}
 		}
-		window.document.onclick = null;
 	}
 	
 	var drawCharacterMenu = function(cursor, names) {
@@ -751,6 +750,24 @@ var game = new function() {
 		}	
 	}
 	
+	var onMouseDown = function(event) {
+        event.preventDefault();
+		var x = event.pageX - canvas.offsetLeft;
+		var y = event.pageY - canvas.offsetTop;
+		handleTouchInput(x, y);
+	}
+	
+	var onTouchStart = function(event) {
+        event.preventDefault();
+		var x = event.targetTouches[0].pageX - canvas.offsetLeft;
+		var y = event.targetTouches[0].pageY - canvas.offsetTop;
+		handleTouchInput(x, y);
+	}
+	
+	var handleTouchInput = function(x, y) {
+		console.log('(' + x + ',' + y + ')');
+	}
+	
 	this.init = function() {
 		isPaused = false;
 		canvas = document.getElementById('game');		
@@ -758,6 +775,10 @@ var game = new function() {
 		loadingScreen.start(canvas, context, sprites);	
 		preLoadAudio();
 		preLoadImages();
+		
+		canvas.addEventListener("touchstart", onTouchStart, false);
+        canvas.addEventListener("mousedown", onMouseDown, false);
+        document.addEventListener("mousedown", onMouseDown, false);
 	}
 	
 	var start = function() {
@@ -769,6 +790,7 @@ var game = new function() {
 					break;
 			}
 		}
+		
 		self.gameLoop();
 		gameLoopInterval = setInterval(self.gameLoop, 1000 / frameRate);	
 	}
