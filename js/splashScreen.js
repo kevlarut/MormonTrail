@@ -31,5 +31,8 @@ var splashScreen = new function() {
 					break;
 			}
 		}
+		game.touchHandler = function(x, y) {
+			callback();
+		}
 	}
 }

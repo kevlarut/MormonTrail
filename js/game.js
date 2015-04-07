@@ -1,5 +1,7 @@
 var game = new function() {
 
+	this.touchHandler = null;
+
 	var food = 0;
 	var canvas = null;
 	var context = null;
@@ -766,6 +768,9 @@ var game = new function() {
 	
 	var handleTouchInput = function(x, y) {
 		console.log('(' + x + ',' + y + ')');
+		if (self.touchHandler != null) {
+			self.touchHandler(x, y);
+		}
 	}
 	
 	this.init = function() {
@@ -790,6 +795,7 @@ var game = new function() {
 					break;
 			}
 		}
+		this.touchHandler = null;
 		
 		self.gameLoop();
 		gameLoopInterval = setInterval(self.gameLoop, 1000 / frameRate);	
