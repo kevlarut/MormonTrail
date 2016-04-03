@@ -18,6 +18,8 @@ var game = new function() {
 	var _lastBuffaloEventMile = 0;
 	var _lastStarvationEventMile = 0;
 	var futureEvents = [];
+	var HANDCART_CAPACITY = 500;
+	var nonFoodInventory = [];
 	
 	this.togglePause = function() {
 		isPaused = !isPaused;
@@ -319,8 +321,19 @@ var game = new function() {
 					if (roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastHuntingEventMile = roadometer;
 						isPaused = true;	
-						stopAllAudio();				
-						huntingMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
+						stopAllAudio();	
+
+						var capacity = HANDCART_CAPACITY;
+						for (var i = 0; i < nonFoodInventory.length; i++) {
+							capacity -= nonFoodInventory[i].weight;
+						}
+						capacity -= food;
+						capacity = Math.round(capacity);
+						
+						huntingMiniGame.start(capacity, canvas, context, sprites, audioAssets, function(meat) { 
+							food += meat;
+							resumeAfterMiniGame(); 
+						});
 						return;			
 					}
 				}
@@ -504,7 +517,7 @@ var game = new function() {
 	}
 	
 	var buySupplies = function() {
-		var capacity = 500;
+		var capacity = HANDCART_CAPACITY;
 		var clothingWeight = 0;
 		for (var i = 0; i < party.length; i++) {
 			if (party[i].isAdult) {
@@ -533,6 +546,12 @@ var game = new function() {
 		context.fillText("Pioneer Outfitter General Store", 10, 10);
 		context.fillStyle = 'white';
 		
+		var clothingAndSuchlike = {
+			name: 'Clothing and suchlike',
+			weight: clothingWeight,
+			isSelected: true,
+			isRequired: true
+		};
 		var items = [
 			{
 				name: 'Spiffy home decorations',
@@ -546,13 +565,10 @@ var game = new function() {
 				isSelected: false,
 				isRequired: false
 			},
-			{
-				name: 'Clothing and suchlike',
-				weight: clothingWeight,
-				isSelected: true,
-				isRequired: true
-			},
+			clothingAndSuchlike
 		];
+		
+		nonFoodInventory.push(clothingAndSuchlike);
 		
 		var cursor = 0;	
 		drawBuySuppliesMenu(cursor, items, capacity);
@@ -573,6 +589,17 @@ var game = new function() {
 					break;
 				case keyboard.X:
 				case keyboard.SPACE:
+					if (items[cursor].isSelected) {
+						for (var i = 0; i < nonFoodInventory.length; i++) {
+							if (nonFoodInventory[i].name === items[cursor].name) {
+								items.splice(i, 1);
+								break;
+							}
+						}
+					}
+					else {
+						nonFoodInventory.push(items[cursor]);						
+					}
 					items[cursor].isSelected = !items[cursor].isSelected;
 					drawBuySuppliesMenu(cursor, items, capacity);
 					break;

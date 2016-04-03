@@ -8,6 +8,7 @@ var huntingMiniGame = new function() {
 	var _timerInterval = null;
 	var _callback = null;
 	var _buffaloSprite = null
+	var _capacity = 0;
 	
 	var x = 0, 
 		y = 0, 
@@ -37,10 +38,10 @@ var huntingMiniGame = new function() {
 		_context.textAlign = 'right';
 		_context.font = "8px 'Here Lies MECC'";
 		_context.fillStyle = 'black';
-		_context.fillText("Animals killed: " + score, 278, 10);		
+		_context.fillText('Animals killed: ' + score, 278, 10);		
 		_context.fillText(Math.floor(timeRemaining), 60, 10);
 		_context.textAlign = 'left';	
-		_context.fillText("Time: ", 10, 10);
+		_context.fillText('Time: ', 10, 10);
 	}
 	
 	var spawnAnimal = function() {
@@ -80,13 +81,54 @@ var huntingMiniGame = new function() {
 		return null;
 	}
 	
-	var end = function() {
+	var end = function(meat) {
 		timeRemaining = DEFAULT_TIME_REMAINING;
 		animals = [];
 		score = 0;
-		clearInterval(_timerInterval);
 		window.document.onkeydown = null;
-		_callback();
+		_callback(meat);
+	}
+	
+	var showPostMortem = function() {
+		var meat = 0;
+		for (var i = 0; i < score; i++) {
+			meat += Math.round(Math.random() * 200) + 200;
+		}
+		meat = Math.round(meat);
+		
+		_context.clearRect(0, 0, _canvas.width, _canvas.height);
+		
+		var horizontalCenter = Math.round(_canvas.width / 2);
+				
+		_context.textAlign = 'center';
+		_context.font = "8px 'Here Lies MECC'";
+		_context.fillStyle = 'red';
+		
+		if (meat == 0) {
+			_context.fillText('You obtained no meat.', horizontalCenter, 100);
+		}
+		else {
+			_context.fillText('You killed ' + meat + ' pounds of meat.', horizontalCenter, 80);
+			_context.fillText('You can carry ' + _capacity + ' pounds of meat;', horizontalCenter, 90);
+			_context.fillText('the rest is wasted.', horizontalCenter, 100);
+		}
+				
+		_context.fillStyle = 'white';
+		_context.fillText('Press ENTER to continue.', horizontalCenter, 120);
+				
+		if (meat > _capacity) {
+			meat = _capacity;
+		}
+		
+		clearInterval(_timerInterval);
+		
+		window.document.onkeydown = function(event) {
+			switch (event.keyCode) {
+				case keyboard.ENTER:
+					end(meat);
+					break;				
+			}
+		}
 	}
 	
 	this.update = function() {
@@ -103,12 +145,12 @@ var huntingMiniGame = new function() {
 		timeRemaining -= 1 / _frameRate;
 		render();
 		if (Math.floor(timeRemaining) <= 0) {
-			end();
+			showPostMortem();
 		}
 	}
 	
-	this.start = function(canvas, context, sprites, audioAssets, callback) {
-
+	this.start = function(capacity, canvas, context, sprites, audioAssets, callback) {		
+		_capacity = capacity;		
 		_canvas = canvas;
 		_context = context;
 		_sprites = sprites;
@@ -133,6 +175,7 @@ var huntingMiniGame = new function() {
 		_context.fillText('beast will I require at your', 10, 100);
 		_context.fillText('hands.', 10, 110);
 		_context.fillText('-- Genesis 9,', 10, 130);
+		
 		_context.fillText('   Joseph Smith Translation', 10, 140);
 							
 		context.beginPath();
@@ -141,7 +184,7 @@ var huntingMiniGame = new function() {
 		context.fill();
 
 		context.fillStyle = 'black';
-		context.fillText("Press ENTER to play", 10, 185);
+		context.fillText('Press ENTER to play', 10, 185);
 		
 		window.document.onkeydown = function(event) {
 			switch (event.keyCode) {
@@ -152,8 +195,7 @@ var huntingMiniGame = new function() {
 		}
 	}
 	
-	var play = function(canvas, context, sprites, audioAssets, callback) {
-		
+	var play = function(canvas, context, sprites, audioAssets, callback) {		
 		_timerInterval = setInterval(function() { 
 			_self.update(); 
 		}, 1000 / _frameRate);
