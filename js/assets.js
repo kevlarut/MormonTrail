@@ -14,9 +14,12 @@ var spriteAssets = {
 		'img/buffalo-5.png',
 	],
 	'buffalo-chip': ['img/buffalo-chip.gif'],
+	'buffalo-dead': ['img/buffalo-dead.png'],
 	'chimney-rock': ['img/chimney-rock.gif'],
 	'defeat': ['img/defeat.gif'],
-	'hunter': ['img/hunter.gif'],
+	'hunter-left': ['img/hunter-left.gif'],
+	'hunter-right': ['img/hunter-right.gif'],
+	'hunting-background': ['img/hunting-background.gif'],
 	'splash': ['img/splash.gif'],
 	
 	'echo-canyon': ['img/echo-canyon.gif'],

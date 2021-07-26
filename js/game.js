@@ -320,7 +320,7 @@ var game = new function() {
 						return;
 					}
 				}
-				else if (randomNumber < 0.01) {
+				else if (randomNumber < 1000) { //TODO: 0.01 is more balanced
 					if (roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastHuntingEventMile = roadometer;
 						isPaused = true;	

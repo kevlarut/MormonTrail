@@ -8,9 +8,12 @@ var huntingMiniGame = new function() {
 	var _timerInterval = null;
 	var _callback = null;
 	var _buffaloSprite = null;
+	var _deadBuffaloSprite = null;
 	var _capacity = 0;
+	var _direction = "left";
 	
 	var bullets = [];
+	var _deadBuffalo = [];
 	
 	var x = 0, 
 		y = 0, 
@@ -18,11 +21,12 @@ var huntingMiniGame = new function() {
 		score = 0;
 	var _frameRate = 10;
 
-	var DEFAULT_TIME_REMAINING = 120;
+	var DEFAULT_TIME_REMAINING = 60;
 	var timeRemaining = DEFAULT_TIME_REMAINING;
 	
 	var render = function() {	
-		_context.clearRect(0, 0, _canvas.width, _canvas.height);
+		_context.clearRect(0, 0, _canvas.width, _canvas.height);		
+		_sprites['hunting-background'].render(_context, 0, 13);
 		
 		_context.beginPath();
 		_context.rect(0, 0, _canvas.width, 13);
@@ -32,6 +36,11 @@ var huntingMiniGame = new function() {
 		for (var i = 0; i < animals.length; i++) {
 			var animal = animals[i];
 			_buffaloSprite.render(_context, animal.x, animal.y);
+		}
+
+		for (var i = 0; i < _deadBuffalo.length; i++) {
+			var corpse = _deadBuffalo[i];
+			_deadBuffaloSprite.render(_context, corpse.x, corpse.y);
 		}
 		
 		for (var i = 0; i < bullets.length; i++) {
@@ -77,6 +86,10 @@ var huntingMiniGame = new function() {
 	
 	var handleCollision = function(animalIndex) {		
 		if (animalIndex != null) {
+			_deadBuffalo.push({
+				x: animals[animalIndex].x,
+				y: animals[animalIndex].y,
+			});
 			animals.splice(animalIndex, 1);
 			score++;
 		}
@@ -108,6 +121,7 @@ var huntingMiniGame = new function() {
 	var end = function(meat) {
 		timeRemaining = DEFAULT_TIME_REMAINING;
 		animals = [];
+		_deadBuffalo = [];
 		score = 0;
 		window.document.onkeydown = null;
 		_callback(meat);
@@ -165,7 +179,12 @@ var huntingMiniGame = new function() {
 		var bulletSpeed = 8;
 		for (var i = bullets.length - 1; i >= 0; i--) {
 			var bullet = bullets[i];
-			bullet.x -= bulletSpeed;
+			if (bullet.direction === "right") {
+				bullet.x += bulletSpeed;
+			} else {
+				bullet.x -= bulletSpeed;
+			}
+
 			if (bullet.x < 0) {
 				bullets.splice(i, 1);
 			}
@@ -179,14 +198,15 @@ var huntingMiniGame = new function() {
 		}
 	}
 	
-	this.start = function(capacity, canvas, context, sprites, audioAssets, callback) {		
+	this.start = function(capacity, canvas, context, sprites, audioAssets, callback) {	
 		_capacity = capacity;		
 		_canvas = canvas;
 		_context = context;
 		_sprites = sprites;
 		_callback = callback;
 		_buffaloSprite = _sprites['buffalo'];
-		_hunterSprite = _sprites['hunter'];
+		_deadBuffaloSprite = _sprites['buffalo-dead'];
+		_hunterSprite = _sprites['hunter-' + _direction];
 			
 		var horizontalCenter = _canvas.width / 2;
 		
@@ -228,7 +248,8 @@ var huntingMiniGame = new function() {
 	var spawnBullet = function(x, y) {
 		bullets.push({
 			x: x,
-			y: y
+			y: y,
+			direction: _direction,
 		});
 	}
 	
@@ -264,20 +285,32 @@ var huntingMiniGame = new function() {
 					break;
 				case keyboard.LEFT:
 					if (x >= speed) {
+						_direction = "left";
+						updateSpriteFromDirection();
 						x -= speed;
 						detectCollision();
 					}
 					break;
 				case keyboard.RIGHT:
 					if (x <= _canvas.width - hunterWidth - speed) {
+						_direction = "right";
+						updateSpriteFromDirection();
 						x += speed;
 						detectCollision();
 					}
 					break;
 				case keyboard.SPACE:
-					spawnBullet(x, y + 6);
+					var bulletX = x;
+					if (_direction === "right") {
+						bulletX += 29;
+					}
+					spawnBullet(bulletX, y + 6);
 					break;
 			}
 		}
+	}
+
+	var updateSpriteFromDirection = function() {		
+		_hunterSprite = _sprites['hunter-' + _direction];
 	}
 }
