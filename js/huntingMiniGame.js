@@ -176,16 +176,25 @@ var huntingMiniGame = new function() {
 		for (var i = 0; i < animals.length; i++) {
 			animals[i].x += animals[i].speed;
 		}
-		var bulletSpeed = 8;
+		var bulletSpeed = 12;
 		for (var i = bullets.length - 1; i >= 0; i--) {
 			var bullet = bullets[i];
-			if (bullet.direction === "right") {
-				bullet.x += bulletSpeed;
-			} else {
-				bullet.x -= bulletSpeed;
+			switch (bullet.direction) {
+				case "up":
+					bullet.y -= bulletSpeed;
+					break;
+				case "down":
+					bullet.y += bulletSpeed;
+					break;
+				case "right":
+					bullet.x += bulletSpeed;
+					break;
+				default: 
+					bullet.x -= bulletSpeed;
+					break;
 			}
 
-			if (bullet.x < 0) {
+			if (bullet.x < 0 || bullet.y < 0 || bullet.x > 280 || bullet.y > 180) {
 				bullets.splice(i, 1);
 			}
 		}
@@ -245,10 +254,29 @@ var huntingMiniGame = new function() {
 		}
 	}
 	
-	var spawnBullet = function(x, y) {
+	var spawnBullet = function() {		
+		var bulletX = x;
+		var bulletY = y;
+		switch (_direction) {
+			case "up":
+				bulletX += 14;
+				break;
+			case "down":
+				bulletX += 14;
+				bulletY += 30;
+				break;
+			case "right":
+				bulletX += 29;
+				bulletY += 6;
+				break;
+			default: 
+				bulletY += 6;
+				break;
+		}
+
 		bullets.push({
-			x: x,
-			y: y,
+			x: bulletX,
+			y: bulletY,
 			direction: _direction,
 		});
 	}
@@ -273,44 +301,41 @@ var huntingMiniGame = new function() {
 			switch (event.keyCode) {
 				case keyboard.UP:
 					if (y >= speed + 12) {
+						updateDirection("up");
 						y -= speed;
 						detectCollision();
 					}
 					break;
 				case keyboard.DOWN:
 					if (y <= _canvas.height - hunterHeight - speed) {
+						updateDirection("down");
 						y += speed;
 						detectCollision();
 					}
 					break;
 				case keyboard.LEFT:
 					if (x >= speed) {
-						_direction = "left";
-						updateSpriteFromDirection();
+						updateDirection("left");
 						x -= speed;
 						detectCollision();
 					}
 					break;
 				case keyboard.RIGHT:
 					if (x <= _canvas.width - hunterWidth - speed) {
-						_direction = "right";
-						updateSpriteFromDirection();
+						updateDirection("right");
 						x += speed;
 						detectCollision();
 					}
 					break;
 				case keyboard.SPACE:
-					var bulletX = x;
-					if (_direction === "right") {
-						bulletX += 29;
-					}
-					spawnBullet(bulletX, y + 6);
+					spawnBullet();
 					break;
 			}
 		}
 	}
 
-	var updateSpriteFromDirection = function() {		
-		_hunterSprite = _sprites['hunter-' + _direction];
+	var updateDirection = function(direction) {		
+		_direction = direction;
+		_hunterSprite = _sprites['hunter-' + direction];
 	}
 }
