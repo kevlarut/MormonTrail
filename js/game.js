@@ -71,6 +71,7 @@ var game = new function() {
 			if (++loaded >= countOfImagesToLoad) {
 				loadingScreen.end();
 				splashScreen.start(canvas, context, sprites, function() {
+					self.touchHandler = null;
 					self.chooseCharacterNames();					
 				});
 			}
@@ -767,7 +768,6 @@ var game = new function() {
 	}
 	
 	var handleTouchInput = function(x, y) {
-		console.log('(' + x + ',' + y + ')');
 		if (self.touchHandler != null) {
 			self.touchHandler(x, y);
 		}

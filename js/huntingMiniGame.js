@@ -18,7 +18,7 @@ var huntingMiniGame = new function() {
 		score = 0;
 	var _frameRate = 10;
 
-	var DEFAULT_TIME_REMAINING = 10;
+	var DEFAULT_TIME_REMAINING = 120;
 	var timeRemaining = DEFAULT_TIME_REMAINING;
 	
 	var render = function() {	
@@ -49,9 +49,15 @@ var huntingMiniGame = new function() {
 		_context.font = "8px 'Here Lies MECC'";
 		_context.fillStyle = 'black';
 		_context.fillText('Animals killed: ' + score, 278, 10);		
-		_context.fillText(Math.floor(timeRemaining), 60, 10);
+		_context.fillText(Math.floor(timeRemaining), 70, 10);
 		_context.textAlign = 'left';	
 		_context.fillText('Time: ', 10, 10);
+		
+		for (var key in _sprites) {
+			if (_sprites.hasOwnProperty(key)) {			
+				_sprites[key].update();
+			}
+		}
 	}
 	
 	var spawnAnimal = function() {
@@ -248,28 +254,24 @@ var huntingMiniGame = new function() {
 					if (y >= speed + 12) {
 						y -= speed;
 						detectCollision();
-						render();
 					}
 					break;
 				case keyboard.DOWN:
 					if (y <= _canvas.height - hunterHeight - speed) {
 						y += speed;
 						detectCollision();
-						render();
 					}
 					break;
 				case keyboard.LEFT:
 					if (x >= speed) {
 						x -= speed;
 						detectCollision();
-						render();
 					}
 					break;
 				case keyboard.RIGHT:
 					if (x <= _canvas.width - hunterWidth - speed) {
 						x += speed;
 						detectCollision();
-						render();
 					}
 					break;
 				case keyboard.SPACE:

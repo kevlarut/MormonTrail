@@ -9,7 +9,7 @@ gameApp.service('deathService', function(partyData, randomService, userInterface
 			userInterfaceService.haltForInput('returnToWalking');				
 		}
 		else {
-			console.log('ERROR: This person is already dead and cannot be killed twice.');
+			console.error('ERROR: This person is already dead and cannot be killed twice.');
 		}
 		
 		for (var i = 0; i < partyData.party.length; i++) {

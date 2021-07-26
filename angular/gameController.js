@@ -48,7 +48,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 	$scope.playAudio = function(src) {
 		var song = $scope.getAudioBySrc(src);
 		if (typeof song.element == 'undefined') {					
-			console.log('ERROR: Audio ' + src + ' has not been loaded yet!');
+			console.error('ERROR: Audio ' + src + ' has not been loaded yet!');
 		}
 		else {
 			song.element.currentTime = 0;
@@ -348,7 +348,7 @@ gameApp.controller('gameController', ['$scope', '$timeout', 'audioData', 'landma
 		$scope.loadImages(function() {
 			ctx
 				.palette('APPLEII')
-				.addFonts([fontC64, fontRetroBig], $scope.update, function() { console.log('A font is missing...'); });
+				.addFonts([fontC64, fontRetroBig], $scope.update, function() { console.error('A font is missing...'); });
 		});
 	}
 	

@@ -19,7 +19,6 @@ var artist = new function() {
     };
 		
 	this.drawWagon = function() {	
-		console.log(this.animationIndex + ' in drawWagon');	
 		if (this.animationIndex === 0) {
 			this.context.drawImage(artist.wagonImage1, 170, 40);
 		}
@@ -55,7 +54,7 @@ var artist = new function() {
 		this.loadImages(function() {
 			ctx
 				.palette('APPLEII')
-				.addFonts([fontC64, fontRetroBig], startGame, function() { console.log('A font is missing...'); });
+				.addFonts([fontC64, fontRetroBig], startGame, function() { console.error('A font is missing...'); });
 		});
 	}
 	
@@ -65,7 +64,6 @@ var artist = new function() {
 	}
 	
 	this.gameLoop = function() {
-		console.log(this.animationIndex + ' in gameLoop');
 		artist.renderWalkingScreen();
 		if (this.animationIndex == 0) {
 			this.animationIndex = 1;

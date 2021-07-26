@@ -6,7 +6,13 @@ var spriteAssets = {
 		'img/seagull-4.gif'
 	],
 	'grass': ['img/grass.gif'],
-	'buffalo': ['img/buffalo.gif'],
+	'buffalo': [
+		'img/buffalo-1.png',
+		'img/buffalo-2.png',
+		'img/buffalo-3.png',
+		'img/buffalo-4.png',
+		'img/buffalo-5.png',
+	],
 	'buffalo-chip': ['img/buffalo-chip.gif'],
 	'chimney-rock': ['img/chimney-rock.gif'],
 	'defeat': ['img/defeat.gif'],

@@ -5,8 +5,6 @@ gameApp.service('gameStateService', function(userInterfaceData, gameState) {
 	var that = this;
 	
 	this.handleInputForViewLandmarkOrReturnToTravel = function(input) {
-		console.log('handleInputForViewLandmarkOrReturnToTravel was called with input ' + input);
-		
 		if (input == 'Y' || input == 'YES') {
 			showSceneForCurrentLandmark();
 		}
@@ -30,7 +28,7 @@ gameApp.service('gameStateService', function(userInterfaceData, gameState) {
 	}
 	
 	this.sizeUpTheSituation = function() {
-		console.log('ERROR: sizeUpTheSituation is not implemented.');
+		console.error('ERROR: sizeUpTheSituation is not implemented.');
 	}
 	
 });
