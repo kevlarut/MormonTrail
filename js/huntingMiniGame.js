@@ -31,18 +31,39 @@ var huntingMiniGame = new function() {
 		_context.beginPath();
 		_context.rect(0, 0, _canvas.width, 13);
 		_context.fillStyle = 'red';
-		_context.fill();
-		
-		for (var i = 0; i < animals.length; i++) {
-			var animal = animals[i];
-			_buffaloSprite.render(_context, animal.x, animal.y);
-		}
+		_context.fill();		
 
-		for (var i = 0; i < _deadBuffalo.length; i++) {
-			var corpse = _deadBuffalo[i];
-			_deadBuffaloSprite.render(_context, corpse.x, corpse.y);
-		}
-		
+		var spritesToRender = [];
+		animals.forEach(animal => 
+			spritesToRender.push({
+				sprite: _buffaloSprite,
+				x: animal.x, 
+				y: animal.y,
+				z: animal.y + _buffaloSprite.height,
+			})
+		);
+		_deadBuffalo.forEach(corpse => 
+			spritesToRender.push({
+				sprite: _deadBuffaloSprite,
+				x: corpse.x, 
+				y: corpse.y,
+				z: corpse.y + _deadBuffaloSprite.height,
+			})
+		);
+		spritesToRender.push({
+			sprite: _hunterSprite,
+			x: x, 
+			y: y,
+			z: y + _hunterSprite.height,
+		});
+		spritesToRender.sort(function(a, b) {
+			return a.z - b.z;
+		});
+
+		spritesToRender.forEach(spriteToRender => 
+			spriteToRender.sprite.render(_context, spriteToRender.x, spriteToRender.y)
+		);
+				
 		for (var i = 0; i < bullets.length; i++) {
 			var bullet = bullets[i];
 				
@@ -51,9 +72,7 @@ var huntingMiniGame = new function() {
 			_context.fillStyle = 'white';
 			_context.fill();
 		}
-		
-		_hunterSprite.render(_context, x, y);
-		
+				
 		_context.textAlign = 'right';
 		_context.font = "8px 'Here Lies MECC'";
 		_context.fillStyle = 'black';
@@ -68,7 +87,7 @@ var huntingMiniGame = new function() {
 			}
 		}
 	}
-	
+
 	var spawnAnimal = function() {
 		var height = _buffaloSprite.height;
 		var width = _buffaloSprite.width;
