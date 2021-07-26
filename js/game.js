@@ -323,6 +323,13 @@ var game = new function() {
 				else if (randomNumber < 1000) { //TODO: 0.01 is more balanced
 					if (roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastHuntingEventMile = roadometer;
+						if (!nonFoodInventory.some(item => item.name === "Flintlock musket")) {							
+							var person = party[0];
+							message = "You have no gun to hunt with.";
+							showMessageForPerson(person.name, message);
+							isPaused = true;
+							return;
+						}
 						isPaused = true;	
 						stopAllAudio();	
 
@@ -563,7 +570,7 @@ var game = new function() {
 				isRequired: false
 			},
 			{
-				name: 'Guns and ammunition',
+				name: 'Flintlock musket',
 				weight: 10,
 				isSelected: false,
 				isRequired: false
@@ -595,7 +602,7 @@ var game = new function() {
 					if (items[cursor].isSelected) {
 						for (var i = 0; i < nonFoodInventory.length; i++) {
 							if (nonFoodInventory[i].name === items[cursor].name) {
-								items.splice(i, 1);
+								nonFoodInventory.splice(i, 1);
 								break;
 							}
 						}

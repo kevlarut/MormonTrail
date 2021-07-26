@@ -11,7 +11,9 @@ var huntingMiniGame = new function() {
 	var _deadBuffaloSprite = null;
 	var _capacity = 0;
 	var _direction = "left";
-	
+	var _lastFireTime = 0;
+	var _rateOfFire = 1000;
+
 	var bullets = [];
 	var _deadBuffalo = [];
 	
@@ -347,8 +349,12 @@ var huntingMiniGame = new function() {
 					}
 					break;
 				case keyboard.SPACE:
-					spawnBullet();
-					break;
+					var now = Date.now();
+					if (now >= _lastFireTime + _rateOfFire) {
+						spawnBullet();
+						_lastFireTime = now;
+						break;
+					}
 			}
 		}
 	}
