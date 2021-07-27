@@ -2,18 +2,21 @@ var buySuppliesScreen = new function() {
     var canvas = null;
     var context = null;
     var party = null;
-    var nonFoodInventory = [];
+    this.nonFoodInventory = [];
     var callback = null;
 	var self = this;
-    var food = 0;
+    this.food = 0;
+	var cursor = 0;	
 
     this.start = function(canvas, context, party, callback) {
         this.canvas = canvas;
         this.context = context;
         this.party = party;
         this.callback = callback;
+		this.touchZones = [];
+		this.food = 0;
 
-		var capacity = HANDCART_CAPACITY;
+		this.capacity = HANDCART_CAPACITY;
 		var clothingWeight = 0;
 		for (var i = 0; i < this.party.length; i++) {
 			if (this.party[i].isAdult) {
@@ -47,7 +50,7 @@ var buySuppliesScreen = new function() {
 			isSelected: true,
 			isRequired: true
 		};
-		var items = [
+		this.items = [
 			{
 				name: 'Flintlock musket',
 				weight: 10,
@@ -63,10 +66,9 @@ var buySuppliesScreen = new function() {
 			clothingAndSuchlike
 		];
 		
-		nonFoodInventory.push(clothingAndSuchlike);
+		this.nonFoodInventory.push(clothingAndSuchlike);
 		
-		var cursor = 0;	
-		self.drawBuySuppliesMenu(cursor, items, capacity);
+		self.drawBuySuppliesMenu(self.cursor);
 				
 		this.context.beginPath();
 		this.context.rect(17, 175, 240, 13);
@@ -79,52 +81,79 @@ var buySuppliesScreen = new function() {
 		window.document.onkeydown = function(event) {
 			switch (event.keyCode) {
 				case keyboard.ENTER:
-					window.document.onkeydown = null;
 					self.end();
 					break;
 				case keyboard.X:
 				case keyboard.SPACE:
-					if (items[cursor].isSelected) {
-						for (var i = 0; i < nonFoodInventory.length; i++) {
-							if (nonFoodInventory[i].name === items[cursor].name) {
-								nonFoodInventory.splice(i, 1);
-								break;
-							}
-						}
-					}
-					else {
-						nonFoodInventory.push(items[cursor]);						
-					}
-					items[cursor].isSelected = !items[cursor].isSelected;
-					self.drawBuySuppliesMenu(cursor, items, capacity);
+					self.toggleItem(self.cursor);
 					break;
 				case keyboard.UP:
-					if (cursor > 0) {
-						cursor--;
-						self.drawBuySuppliesMenu(cursor, items, capacity);
+					if (self.cursor > 0) {
+						self.cursor--;
+						self.drawBuySuppliesMenu(self.cursor);
 					}
 					break;
 				case keyboard.DOWN:
-					if (cursor < items.length - 2) {
-						cursor++;
-						self.drawBuySuppliesMenu(cursor, items, capacity);
+					if (self.cursor < self.items.length - 2) {
+						self.cursor++;
+						self.drawBuySuppliesMenu(self.cursor);
 					}
 					break;
 			}
 		}
+		
+		var line = 0;
+		for (line = 0; line < self.items.length - 1; line++) {
+			var y = 25 + 15 * line;
+			
+			self.touchZones.push({
+				left: 0,
+				right: this.canvas.width,
+				top: y - 10,
+				bottom: y + 2,
+				itemIndex: line,
+			});
+		}		
+
+		self.touchZones.push({
+			left: 17,
+			top: 176,
+			right: 257,
+			bottom: 189,
+			action: "continue",
+		});
+		game.touchHandler = this.handleTouchInput;
 	}
     
-	self.drawBuySuppliesMenu = function(cursor, items, capacity) {	
+	this.toggleItem = (cursor) => {
+		if (!self.items[cursor].isRequired) {
+			if (self.items[cursor].isSelected) {
+				for (var i = 0; i < self.nonFoodInventory.length; i++) {
+					if (self.nonFoodInventory[i].name === self.items[cursor].name) {
+						self.nonFoodInventory.splice(i, 1);
+						break;
+					}
+				}
+			}
+			else {
+				self.nonFoodInventory.push(self.items[cursor]);						
+			}
+			self.items[cursor].isSelected = !self.items[cursor].isSelected;
+		}
+		self.drawBuySuppliesMenu(cursor);
+	}
+
+	this.drawBuySuppliesMenu = function(cursor) {	
 		this.context.clearRect(0, 15, this.canvas.width, 100);
 		
-		this.food = capacity;
+		self.food = self.capacity;
 	
 		var line = 0;
-		for (line = 0; line < items.length; line++) {
-			var item = items[line];
+		for (line = 0; line < self.items.length; line++) {
+			var item = self.items[line];
 			
 			if (item.isSelected) {
-				this.food -= item.weight;
+				self.food -= item.weight;
 			}
 			
 			var y = 25 + 15 * line;
@@ -147,9 +176,27 @@ var buySuppliesScreen = new function() {
 		}
 		
 		this.context.textAlign = 'left';
-		this.context.fillText('You will carry ' + this.food + ' pounds of food.', 10, 40 + line * 15);
+		this.context.fillText('You will carry ' + self.food + ' pounds of food.', 10, 40 + line * 15);
 	}
+	
+	this.handleTouchInput = function(x, y) {
+		for (var i = 0; i < self.touchZones.length; i++) {
+			var zone = self.touchZones[i];
+			if (x >= zone.left && x <= zone.right && y >= zone.top && y <= zone.bottom) {
+				if (zone.itemIndex !== undefined) {
+					self.cursor = zone.itemIndex;
+					self.toggleItem(self.cursor);
+				}
+				if (zone.action === "continue") {
+					self.end();
+				}
+			}
+		}
+	}
+
     this.end = function() {
-        this.callback(nonFoodInventory, this.food);
+		window.document.onkeydown = null;
+		game.touchHandler = null;
+        self.callback(self.nonFoodInventory, self.food);
     }
 }

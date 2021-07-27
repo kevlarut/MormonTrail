@@ -35,7 +35,7 @@ var characterScreen = new function() {
 			right: 257,
 			bottom: 189,
 			action: "continue",
-		})
+		});
 
 		game.touchHandler = this.handleTouchInput;
 
@@ -118,28 +118,24 @@ var characterScreen = new function() {
 				case keyboard.LEFT:
 					if (cursor % 2 == 1) {
 						cursor--;
-						console.log("cursor is ", cursor);
 						self.drawCharacterMenu(cursor, self.names);
 					}
 					break;
 				case keyboard.UP:
 					if (cursor > 1) {
 						cursor -= 2;
-						console.log("cursor is ", cursor);
 						self.drawCharacterMenu(cursor, self.names);
 					}
 					break;
 				case keyboard.RIGHT:
 					if (cursor % 2 == 0) {
 						cursor++;
-						console.log("cursor is ", cursor);
 						self.drawCharacterMenu(cursor, self.names);
 					}
 					break;
 				case keyboard.DOWN:
 					if (cursor < self.names.length - 2) {
 						cursor += 2;
-						console.log("cursor is ", cursor);
 						self.drawCharacterMenu(cursor, names);
 					}
 					break;
@@ -162,7 +158,6 @@ var characterScreen = new function() {
 
 	this.setCursor = (cursor) => {
 		self.cursor = cursor;
-		console.log("cursor is ", cursor);		
 	}
 
 	this.handleTouchInput = function(x, y) {
@@ -199,7 +194,6 @@ var characterScreen = new function() {
 	}
 
 	this.toggleSelected = (nameIndex) => {
-		console.log("toggleSelected for ", self.names[nameIndex].name, self.names[nameIndex].selected);
 		if (self.names[nameIndex].selected) {
 			self.names[nameIndex].selected = false;
 			self.selectedCount--;
