@@ -364,7 +364,7 @@ var game = new function() {
 						giveSomeoneADiseaseAndShowADialogBoxAboutIt();
 						return;
 					}
-				} else if (randomNumber < 1) { //TODO: 0.025
+				} else if (randomNumber < 0.025) {
 					if (roadometer - _lastShoulderMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastShoulderMile = roadometer;
 						isPaused = true;	

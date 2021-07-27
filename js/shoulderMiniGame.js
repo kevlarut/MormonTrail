@@ -7,10 +7,10 @@ var shoulderMiniGame = new function() {
 	var _physicsTimer = null;
 	var _timerInterval = null;
 	var _callback = null;
-	var _frame = 2;
-	var _velocity = 0;
+	var _frame = 1;
+	var _force = 0;
 	
-	var timeRemaining = 1000; //TODO: 10
+	var timeRemaining = 10;
 	
 	var render = function() {
 		_context.clearRect(0, 0, _canvas.width, _canvas.height);
@@ -28,17 +28,47 @@ var shoulderMiniGame = new function() {
 		_context.fillText(timeRemaining, 70, 10);
 		_context.textAlign = 'left';
 
-		_context.fillText(_velocity, 120, 10);
-		_context.fillText(_frame, 160, 10);
+		const meterWidth = 170;
+		_context.beginPath();
+		_context.rect(100, 3, meterWidth, 7);
+		_context.fillStyle = 'black';
+		_context.fill();
+		
+		var max = meterWidth;
+		var scale = _force / 5 * max;
+		if (scale > max) {
+			scale = max;
+		}
+		_context.beginPath();
+		_context.rect(100, 3, Math.floor(scale), 7);
+		_context.fillStyle = 'red';
+		_context.fill();
 
+		_context.fillStyle = 'white';
 		_context.fillText("Time: ", 10, 10);
+		
+		_context.beginPath();
+		_context.rect(40, 170, 200, 20);
+		_context.fillStyle = 'black';
+		_context.fill();
+
+		_context.textAlign = "center"
+		_context.fillStyle = 'white';
+		_context.fillText("Press P to push", 160, 183);
 	}
 			
-	var end = function() {
+	var end = function(wasSuccessful) {
 		timeRemaining = 10;
 		clearInterval(_physicsTimer);
 		clearInterval(_timerInterval);
 		window.document.onkeydown = null;
+
+		if (wasSuccessful) {
+			console.log("You dislodged your stuck wheel!");
+		} else {
+			console.log("Your wheel is still stuck.");
+		}
+
 		_callback();
 	}
 		
@@ -46,51 +76,25 @@ var shoulderMiniGame = new function() {
 		timeRemaining--;
 		render();
 		if (timeRemaining == 0) {
-			end();
+			end(false);
 		}
 	}
 
 	this.updatePhysics = function() {
-		const gravity = 2;
-		if (_velocity > 0) {
-			_velocity -= gravity;
-		} else if (_velocity < 0) {
-			_velocity += gravity;
+		var gravity = 1;
+		if (_force > 0) {
+			_force -= gravity;
+			if (_force < 0) {
+				_force = 0;
+			}
 		}
+		if (_force > 4) {
+			end(true);
+			_force = 4;
+		}
+		_frame = Math.floor(_force + 1);
 
-		switch (_frame) {
-			case 1:
-				if (_velocity > -30) {
-					_frame++;
-				}
-				break;
-			case 2:
-				if (_velocity <= -30) {
-					_frame--;
-				} else if (_velocity > -10) {
-					_frame++;
-				}
-				break;
-			case 3:
-				if (_velocity >= 10) {
-					_frame++;
-				} else if (_velocity <= -10) {
-					_frame--;
-				}
-				break;
-			case 4: 
-				if (_velocity >= 30) {
-					_frame++;
-				} else if (_velocity < 10) {
-					_frame--;
-				}
-				break;
-			case 5: 
-				if (_velocity < 30) {
-					_frame--;
-				}
-				break;
-		}
+		render();
 	}
 	
 	this.start = function(canvas, context, sprites, audioAssets, callback) {	
@@ -98,11 +102,11 @@ var shoulderMiniGame = new function() {
 		_context = context;
 		_sprites = sprites;
 		_callback = callback;
-		_frame = 2;
+		_frame = 1;
+		_froce = 0;
 	
-		//TODO: PUT_YOUR_SHOULDER_TO_THE_WHEEL
-		var WOAH_HAW_BUCK_AND_JERRY_BOY = 1;
-		var song = audioAssets[WOAH_HAW_BUCK_AND_JERRY_BOY];
+		var PUT_YOUR_SHOULDER_TO_THE_WHEEL = 8;
+		var song = audioAssets[PUT_YOUR_SHOULDER_TO_THE_WHEEL];
 		if (typeof song.element != 'undefined') {
 			song.element.currentTime = 0;
 			song.element.play();
@@ -147,15 +151,22 @@ var shoulderMiniGame = new function() {
 				
 		render();
 		
-		//TODO: Do onkeypress instead of onkeydown so you have to spam it instead of holding it down.
 		window.document.onkeydown = function(event) {
 			switch (event.keyCode) {
-				case keyboard.LEFT:
-					_velocity--;
-					render();
-					break;
-				case keyboard.RIGHT:
-					_velocity++;
+				case keyboard.P:
+					var min = 0;
+					var max = 0.5;
+					var providence = Math.random() * (max - min) + min;
+					_force += providence;
+					if (_force < 1) {
+						_force++;
+					} else if (_force < 2) {
+						_force += 0.75;
+					} else if (_force < 3) {
+						_force += 0.5;
+					} else if (_force < 4) {
+						_force += 0.25;
+					}
 					render();
 					break;
 			}

@@ -2,11 +2,8 @@ var buySuppliesScreen = new function() {
     var canvas = null;
     var context = null;
     var party = null;
-    this.nonFoodInventory = [];
     var callback = null;
 	var self = this;
-    this.food = 0;
-	var cursor = 0;	
 
     this.start = function(canvas, context, party, callback) {
         this.canvas = canvas;
@@ -15,6 +12,8 @@ var buySuppliesScreen = new function() {
         this.callback = callback;
 		this.touchZones = [];
 		this.food = 0;
+		this.cursor = 0;
+		this.nonFoodInventory = [];
 
 		this.capacity = HANDCART_CAPACITY;
 		var clothingWeight = 0;

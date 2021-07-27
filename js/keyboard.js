@@ -15,5 +15,6 @@ var keyboard = {
 	SEVEN: 55,
 	EIGHT: 56,	
 	NINE: 57,
+	P: 80,
 	X: 88,
 };

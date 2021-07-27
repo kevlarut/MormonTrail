@@ -94,6 +94,7 @@ var audioAssets = [
 	{ 'src': 'audio/the-handcart-song.mp3' },
 	{ 'src': 'audio/the-oxcart.mp3' },
 	{ 'src': 'audio/to-be-a-pioneer.mp3' },	
-	{ 'src': 'audio/come-all-ye-saints-of-zion.mp3' }
+	{ 'src': 'audio/come-all-ye-saints-of-zion.mp3' },	
+	{ 'src': 'audio/put-your-shoulder-to-the-wheel.mp3' }
 ];
 	
