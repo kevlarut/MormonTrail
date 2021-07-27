@@ -25,7 +25,7 @@ var huntingMiniGame = new function() {
 		score = 0;
 	var _frameRate = 10;
 
-	var DEFAULT_TIME_REMAINING = 60;
+	var DEFAULT_TIME_REMAINING = 30;
 	var timeRemaining = DEFAULT_TIME_REMAINING;
 	
 	var render = function() {	
