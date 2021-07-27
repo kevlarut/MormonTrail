@@ -2,7 +2,6 @@ var game = new function() {
 
 	this.touchHandler = null;
 
-	var food = 0;
 	var canvas = null;
 	var context = null;
 	var frameRate = 3;
@@ -20,7 +19,6 @@ var game = new function() {
 	var _lastBuffaloEventMile = 0;
 	var _lastStarvationEventMile = 0;
 	var futureEvents = [];
-	var nonFoodInventory = [];
 	
 	this.togglePause = function() {
 		isPaused = !isPaused;
@@ -64,8 +62,8 @@ var game = new function() {
 	var continueAfterCharacterScreen = function(partyChosenFromCharacterScreen) {
 		party = partyChosenFromCharacterScreen;
 		buySuppliesScreen.start(canvas, context, party, function(nonFoodInventoryFromSuppliesScreen, foodFromSuppliesScreen) {
-			nonFoodInventory = nonFoodInventoryFromSuppliesScreen;
-			food = foodFromSuppliesScreen;
+			inventory.nonFoodInventory = nonFoodInventoryFromSuppliesScreen;
+			inventory.food = foodFromSuppliesScreen;
 			start();
 		});
 	}
@@ -332,7 +330,7 @@ var game = new function() {
 				else if (randomNumber < 0.01) {
 					if (roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastHuntingEventMile = roadometer;
-						if (!nonFoodInventory.some(item => item.name === "Flintlock musket")) {							
+						if (!inventory.nonFoodInventory.some(item => item.name === "Flintlock musket")) {							
 							var person = party[0];
 							message = "You have no gun to hunt with.";
 							showMessageForPerson(person.name, message);
@@ -343,14 +341,14 @@ var game = new function() {
 						audioPlayer.stopAllAudio();	
 
 						var capacity = HANDCART_CAPACITY;
-						for (var i = 0; i < nonFoodInventory.length; i++) {
-							capacity -= nonFoodInventory[i].weight;
+						for (var i = 0; i < inventory.nonFoodInventory.length; i++) {
+							capacity -= inventory.nonFoodInventory[i].weight;
 						}
-						capacity -= food;
+						capacity -= inventory.food;
 						capacity = Math.round(capacity);
 						
 						huntingMiniGame.start(capacity, canvas, context, sprites, audioAssets, function(meat) { 
-							food += meat;
+							inventory.food += meat;
 							resume();
 						});
 						return;			
@@ -381,9 +379,9 @@ var game = new function() {
 					partyFoodEatenPerDay += poundsOfFoodPerChildPerDay;
 				}
 			}
-			food -= partyFoodEatenPerDay * dayAdvancementSpeed;
-			if (food < 0) {
-				food = 0;
+			inventory.food -= partyFoodEatenPerDay * dayAdvancementSpeed;
+			if (inventory.food < 0) {
+				inventory.food = 0;
 				if (roadometer - _lastStarvationEventMile >= minimumMilesBetweenStarvationEvent) {
 					_lastStarvationEventMile = roadometer;
 					isPaused = true;
@@ -482,7 +480,7 @@ var game = new function() {
 			context.fillStyle = 'black';
 			context.fillText('Date: ' + date.toDateString(), 10, 140);
 			context.fillText('Roadometer: ' + Math.round(roadometer) + ' miles', 10, 150);
-			context.fillText('Food: ' + Math.round(food) + ' pounds', 10, 160);
+			context.fillText('Food: ' + Math.round(inventory.food) + ' pounds', 10, 160);
 			
 			background.render(context, 0, 10);
 			renderHandcartFamily();

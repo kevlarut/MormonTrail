@@ -22,7 +22,8 @@ var ponderScreen = new function() {
 		
 		this.context.fillText("You may:", 10, 10);
 		this.context.fillText("1. Continue on the trail", 20, 30);
-		this.context.fillText("2. Look at map", 20, 40);
+		this.context.fillText("2. Check your supplies", 20, 40);
+		this.context.fillText("3. Look at map", 20, 50);
 		this.context.fillText("What is your choice?", 10, 180);
 
 		window.document.onkeydown = function(event) {
@@ -32,6 +33,10 @@ var ponderScreen = new function() {
 					self.end();
 					break;
 				case keyboard.TWO:
+					window.document.onkeydown = null;
+					suppliesScreen.start(self.canvas, self.context, self.sprites, self.initialize);
+					break;
+				case keyboard.THREE:
 					window.document.onkeydown = null;
 					mapScreen.start(self.canvas, self.context, self.sprites, self.initialize);
 					break;
