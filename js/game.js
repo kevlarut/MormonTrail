@@ -17,6 +17,7 @@ var game = new function() {
 	var _lastDiseaseEventMile = 0;
 	var _lastHuntingEventMile = 0;
 	var _lastBuffaloEventMile = 0;
+	var _lastShoulderMile = 0;
 	var _lastStarvationEventMile = 0;
 	var futureEvents = [];
 	
@@ -359,6 +360,14 @@ var game = new function() {
 						_lastDiseaseEventMile = roadometer;
 						isPaused = true;
 						giveSomeoneADiseaseAndShowADialogBoxAboutIt();
+						return;
+					}
+				} else if (randomNumber < 1) { //TODO: 0.025
+					if (roadometer - _lastShoulderMile >= minimumMilesBetweenSameRandomEvent) {
+						_lastShoulderMile = roadometer;
+						isPaused = true;	
+						audioPlayer.stopAllAudio();			
+						shoulderMiniGame.start(canvas, context, sprites, audioAssets, resume);
 						return;
 					}
 				}
