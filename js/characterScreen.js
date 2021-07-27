@@ -28,7 +28,14 @@ var characterScreen = new function() {
 					nameIndex: index,
 				});
 			}
-		}	
+		}
+		this.touchZones.push({
+			left: 17,
+			top: 176,
+			right: 257,
+			bottom: 189,
+			action: "continue",
+		})
 
 		game.touchHandler = this.handleTouchInput;
 
@@ -103,16 +110,7 @@ var characterScreen = new function() {
 		window.document.onkeydown = function(event) {
 			switch (event.keyCode) {
 				case keyboard.ENTER:
-					if (self.selectedCount == self.partySize) {
-						window.document.onkeydown = null;
-						for (var i = 0; i < self.names.length; i++) {
-							var name = self.names[i];
-							if (name.selected) {
-								party.push(name);
-							}
-						}
-						self.end();
-					}
+					self.continue();
 					break;
 				case keyboard.SPACE:
 					self.toggleSelected(cursor);
@@ -149,6 +147,19 @@ var characterScreen = new function() {
 		}
 	}	
 	
+	this.continue = () => {
+		if (self.selectedCount == self.partySize) {
+			window.document.onkeydown = null;
+			for (var i = 0; i < self.names.length; i++) {
+				var name = self.names[i];
+				if (name.selected) {
+					party.push(name);
+				}
+			}
+			self.end();
+		}
+	}
+
 	this.setCursor = (cursor) => {
 		self.cursor = cursor;
 		console.log("cursor is ", cursor);		
@@ -158,9 +169,13 @@ var characterScreen = new function() {
 		for (var i = 0; i < self.touchZones.length; i++) {
 			var zone = self.touchZones[i];
 			if (x >= zone.left && x <= zone.right && y >= zone.top && y <= zone.bottom) {
-				cursor = zone.nameIndex;
-				self.toggleSelected(cursor);
-				return;
+				if (zone.nameIndex !== undefined) {
+					cursor = zone.nameIndex;
+					self.toggleSelected(cursor);
+					return;
+				} else if (zone.action === "continue") {
+					self.continue();
+				}
 			}
 		}
 	}
@@ -195,7 +210,8 @@ var characterScreen = new function() {
 		}
 	}
 
-	this.end = function() {
+	this.end = function() {		
+		game.touchHandler = null;
 		self.callback(party);
 	}
 }
