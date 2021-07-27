@@ -20,7 +20,6 @@ var game = new function() {
 	var _lastBuffaloEventMile = 0;
 	var _lastStarvationEventMile = 0;
 	var futureEvents = [];
-	var HANDCART_CAPACITY = 500;
 	var nonFoodInventory = [];
 	
 	this.togglePause = function() {
@@ -64,7 +63,11 @@ var game = new function() {
 	
 	var continueAfterCharacterScreen = function(partyChosenFromCharacterScreen) {
 		party = partyChosenFromCharacterScreen;
-		buySupplies();
+		buySuppliesScreen.start(canvas, context, party, function(nonFoodInventoryFromSuppliesScreen, foodFromSuppliesScreen) {
+			nonFoodInventory = nonFoodInventoryFromSuppliesScreen;
+			food = foodFromSuppliesScreen;
+			start();
+		});
 	}
 
 	var preLoadImages = function() {	
@@ -499,145 +502,7 @@ var game = new function() {
 		
 		self.ensureThatASongIsPlaying();
 	}
-	
-	var drawBuySuppliesMenu = function(cursor, items, capacity) {	
-		context.clearRect(0, 15, canvas.width, 100);
-		
-		food = capacity;
-	
-		var line = 0;
-		for (line = 0; line < items.length; line++) {
-			var item = items[line];
 			
-			if (item.isSelected) {
-				food -= item.weight;
-			}
-			
-			var y = 25 + 15 * line;
-			
-			if (line === cursor) {		
-				context.beginPath();
-				context.rect(0, y - 10, canvas.width, 12);
-				context.fillStyle = 'white';
-				context.fill();
-				context.fillStyle = 'black';
-			}
-			else {			
-				context.fillStyle = 'white';
-			}
-			
-			context.textAlign = 'left';
-			context.fillText('[' + (item.isSelected ? 'X' : ' ') + '] ' + item.name, 10, y);				
-			context.textAlign = 'right';
-			context.fillText(item.weight + '#', 275, y);
-		}
-		
-		context.textAlign = 'left';
-		context.fillText('You will carry ' + food + ' pounds of food.', 10, 40 + line * 15);
-	}
-	
-	var buySupplies = function() {
-		var capacity = HANDCART_CAPACITY;
-		var clothingWeight = 0;
-		for (var i = 0; i < party.length; i++) {
-			if (party[i].isAdult) {
-				clothingWeight += 17;
-			}
-			else {
-				clothingWeight += 10;
-			}
-		}
-	
-		audioPlayer.stopAllAudio();
-		context.clearRect(0, 0, canvas.width, canvas.height);
-		
-		context.textAlign = 'center';
-		context.font = "8px 'Here Lies MECC'";
-		context.fillStyle = 'black';
-		
-		context.beginPath();
-		context.rect(0, 0, canvas.width, 13);
-		context.fillStyle = '#93D6BF';
-		context.fill();
-			
-		context.textAlign = 'left';
-		context.fillStyle = 'black';
-		context.fillText("Pioneer Outfitter General Store", 10, 10);
-		context.fillStyle = 'white';
-		
-		var clothingAndSuchlike = {
-			name: 'Clothing and suchlike',
-			weight: clothingWeight,
-			isSelected: true,
-			isRequired: true
-		};
-		var items = [
-			{
-				name: 'Flintlock musket',
-				weight: 10,
-				isSelected: false,
-				isRequired: false
-			},
-			{
-				name: 'Spiffy home decorations',
-				weight: 60,
-				isSelected: false,
-				isRequired: false
-			},
-			clothingAndSuchlike
-		];
-		
-		nonFoodInventory.push(clothingAndSuchlike);
-		
-		var cursor = 0;	
-		drawBuySuppliesMenu(cursor, items, capacity);
-				
-		context.beginPath();
-		context.rect(17, 175, 240, 13);
-		context.fillStyle = 'white';
-		context.fill();
-
-		context.fillStyle = 'black';
-		context.fillText("Press ENTER to continue", 20, 185);
-
-		window.document.onkeydown = function(event) {
-			switch (event.keyCode) {
-				case keyboard.ENTER:
-					window.document.onkeydown = null;
-					start();
-					break;
-				case keyboard.X:
-				case keyboard.SPACE:
-					if (items[cursor].isSelected) {
-						for (var i = 0; i < nonFoodInventory.length; i++) {
-							if (nonFoodInventory[i].name === items[cursor].name) {
-								nonFoodInventory.splice(i, 1);
-								break;
-							}
-						}
-					}
-					else {
-						nonFoodInventory.push(items[cursor]);						
-					}
-					items[cursor].isSelected = !items[cursor].isSelected;
-					drawBuySuppliesMenu(cursor, items, capacity);
-					break;
-				case keyboard.UP:
-					if (cursor > 0) {
-						cursor--;
-						drawBuySuppliesMenu(cursor, items, capacity);
-					}
-					break;
-				case keyboard.DOWN:
-					if (cursor < items.length - 2) {
-						cursor++;
-						drawBuySuppliesMenu(cursor, items, capacity);
-					}
-					break;
-			}
-		}
-	}
-		
 	var onMouseDown = function(event) {
         event.preventDefault();
 		var x = event.pageX - canvas.offsetLeft;

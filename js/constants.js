@@ -1,0 +1,1 @@
+var HANDCART_CAPACITY = 500;
