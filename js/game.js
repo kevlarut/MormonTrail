@@ -48,7 +48,7 @@ var game = new function() {
 			song.element.play();
 		}
 	}
-	
+
 	var preLoadAudio = function() {
 		for (var key in audioAssets) {		
 			if (audioAssets.hasOwnProperty(key)) {
@@ -97,17 +97,10 @@ var game = new function() {
 		background.preLoadImages(['img/clouds.gif', 'img/plains-background.gif', 'img/plains-foreground.gif'], callback);
 	}
 	
-	var resumeAfterMiniGame = function() {
+	var resume = function() {
 		audioPlayer.stopAllAudio(); 
 		isPaused = false;
-		
-		window.document.onkeydown = function(event) {
-			switch (event.keyCode) {
-				case keyboard.ENTER:
-					game.togglePause();
-					break;
-			}
-		}
+		setEnterToPonder();
 	}
 	
 	var drawDialogBoxBesidePortrait = function(message) {
@@ -123,6 +116,7 @@ var game = new function() {
 		context.clearRect(0, 95, canvas.width, 20);	
 		sprites[personName.toLowerCase()].render(context, 5, 97);
 		drawDialogBoxBesidePortrait(message);
+		setEnterToResume();
 	}
 	
 	var setFutureEvent = function(daysInFuture, delegate) {
@@ -331,7 +325,7 @@ var game = new function() {
 						_lastBuffaloEventMile = roadometer;
 						isPaused = true;	
 						audioPlayer.stopAllAudio();			
-						buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
+						buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, resume);
 						return;
 					}
 				}
@@ -357,7 +351,7 @@ var game = new function() {
 						
 						huntingMiniGame.start(capacity, canvas, context, sprites, audioAssets, function(meat) { 
 							food += meat;
-							resumeAfterMiniGame(); 
+							resume();
 						});
 						return;			
 					}
@@ -410,10 +404,10 @@ var game = new function() {
 			
 			var nextLandmark = landmarks[nextLandmarkIndex];
 			var nextLandmarkMiles = nextLandmark.miles;
-			if (roadometer + milesTraveled >= nextLandmarkMiles) {		
-			
+			if (roadometer + milesTraveled >= nextLandmarkMiles) {					
 				roadometer = nextLandmarkMiles;
-				nextLandmarkIndex++;			
+				nextLandmarkIndex++;
+				setEnterToResume();
 				
 				context.clearRect(0, 0, canvas.width, canvas.height);
 				sprites[nextLandmark.sprite].render(context, 0, 0);
@@ -483,6 +477,8 @@ var game = new function() {
 			
 			context.textAlign = 'left';
 			context.font = '8px "Here Lies MECC"';
+			context.fillText("Press ENTER to ponder the situation", 0, 110);
+
 			context.fillStyle = 'black';
 			context.fillText('Date: ' + date.toDateString(), 10, 140);
 			context.fillText('Roadometer: ' + Math.round(roadometer) + ' miles', 10, 150);
@@ -537,17 +533,32 @@ var game = new function() {
 	}
 	
 	var start = function() {
-		window.document.onkeydown = function(event) {
-			switch (event.keyCode) {
-				case keyboard.ENTER:
-					game.togglePause();
-					break;
-			}
-		}
+		setEnterToPonder();
 		this.touchHandler = null;
 		
 		self.gameLoop();
 		gameLoopInterval = setInterval(self.gameLoop, 1000 / frameRate);	
+	}
+
+	var setEnterToPonder = function() {
+		window.document.onkeydown = function(event) {
+			switch (event.keyCode) {
+				case keyboard.ENTER:
+					game.togglePause();
+					ponderScreen.start(canvas, context, resume);
+					break;
+			}
+		}
+	}
+
+	var setEnterToResume = function() {		
+		window.document.onkeydown = function(event) {		  
+			switch (event.keyCode) {
+				case keyboard.ENTER:	
+					resume();
+					break;
+			}
+		}
 	}
 }
 

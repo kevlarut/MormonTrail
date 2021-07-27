@@ -150,6 +150,6 @@ var buySuppliesScreen = new function() {
 		this.context.fillText('You will carry ' + this.food + ' pounds of food.', 10, 40 + line * 15);
 	}
     this.end = function() {
-        this.callback(this.nonFoodInventory, this.food);
+        this.callback(nonFoodInventory, this.food);
     }
 }
