@@ -62,8 +62,12 @@ var game = new function() {
 		}
 	}
 	
-	var preLoadImages = function() {
-	
+	var continueAfterCharacterScreen = function(partyChosenFromCharacterScreen) {
+		party = partyChosenFromCharacterScreen;
+		buySupplies();
+	}
+
+	var preLoadImages = function() {	
 		var countOfImagesToLoad = Object.keys(spriteAssets).length + 1;
 		var loaded = 0;
 	
@@ -72,7 +76,7 @@ var game = new function() {
 				loadingScreen.end();
 				splashScreen.start(canvas, context, sprites, function() {
 					self.touchHandler = null;
-					self.chooseCharacterNames();					
+					characterScreen.start(canvas, context, sprites, continueAfterCharacterScreen);				
 				});
 			}
 		}
@@ -90,16 +94,8 @@ var game = new function() {
 		background.preLoadImages(['img/clouds.gif', 'img/plains-background.gif', 'img/plains-foreground.gif'], callback);
 	}
 	
-	var stopAllAudio = function() {
-		for (var i = 0; i < audioAssets.length; i++) {
-			var song = audioAssets[i];
-			song.element.pause();
-			song.element.currentTime = 0;
-		}
-	}
-	
 	var resumeAfterMiniGame = function() {
-		stopAllAudio(); 
+		audioPlayer.stopAllAudio(); 
 		isPaused = false;
 		
 		window.document.onkeydown = function(event) {
@@ -310,8 +306,7 @@ var game = new function() {
 	}
 	
 	this.gameLoop = function() {
-		if (!isPaused) {
-		
+		if (!isPaused) {		
 			for (var i = futureEvents.length - 1; i >= 0; i--) {
 				var event = futureEvents[i];
 				if (event.date <= date) {
@@ -332,7 +327,7 @@ var game = new function() {
 					if (roadometer - _lastBuffaloEventMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastBuffaloEventMile = roadometer;
 						isPaused = true;	
-						stopAllAudio();			
+						audioPlayer.stopAllAudio();			
 						buffaloChipsMiniGame.start(canvas, context, sprites, audioAssets, function() { resumeAfterMiniGame(); });
 						return;
 					}
@@ -348,7 +343,7 @@ var game = new function() {
 							return;
 						}
 						isPaused = true;	
-						stopAllAudio();	
+						audioPlayer.stopAllAudio();	
 
 						var capacity = HANDCART_CAPACITY;
 						for (var i = 0; i < nonFoodInventory.length; i++) {
@@ -439,7 +434,7 @@ var game = new function() {
 					context.fillText('the desert shall rejoice, and', horizontalCenter, 30);
 					context.fillText('blossom as the rose." (Isaiah 35:1)', horizontalCenter, 40);
 					
-					stopAllAudio();
+					audioPlayer.stopAllAudio();
 						
 					context.fillStyle = 'white';
 					context.fillText("Press ENTER to start a new game", horizontalCenter, 190);
@@ -457,8 +452,7 @@ var game = new function() {
 								gameOver();
 								break;
 						}
-					}			
-					
+					}
 				}
 				else {				
 					context.textAlign = 'center';
@@ -506,8 +500,7 @@ var game = new function() {
 		self.ensureThatASongIsPlaying();
 	}
 	
-	var drawBuySuppliesMenu = function(cursor, items, capacity) {
-	
+	var drawBuySuppliesMenu = function(cursor, items, capacity) {	
 		context.clearRect(0, 15, canvas.width, 100);
 		
 		food = capacity;
@@ -555,7 +548,7 @@ var game = new function() {
 			}
 		}
 	
-		stopAllAudio();
+		audioPlayer.stopAllAudio();
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		
 		context.textAlign = 'center';
@@ -566,8 +559,7 @@ var game = new function() {
 		context.rect(0, 0, canvas.width, 13);
 		context.fillStyle = '#93D6BF';
 		context.fill();
-		
-		var horizontalCenter = canvas.width / 2;		
+			
 		context.textAlign = 'left';
 		context.fillStyle = 'black';
 		context.fillText("Pioneer Outfitter General Store", 10, 10);
@@ -607,7 +599,7 @@ var game = new function() {
 
 		context.fillStyle = 'black';
 		context.fillText("Press ENTER to continue", 20, 185);
-				
+
 		window.document.onkeydown = function(event) {
 			switch (event.keyCode) {
 				case keyboard.ENTER:
@@ -645,138 +637,7 @@ var game = new function() {
 			}
 		}
 	}
-			
-	this.chooseCharacterNames = function() {
-	
-		stopAllAudio();
-	
-		var partySize = 4;
-		context.clearRect(0, 0, canvas.width, canvas.height);
 		
-		context.beginPath();
-		context.rect(20, 10, 240, 25);
-		context.fillStyle = 'white';
-		context.fill();
-			
-		context.textAlign = 'center';
-		context.font = "8px 'Here Lies MECC'";
-		context.fillStyle = 'black';
-		
-		var horizontalCenter = canvas.width / 2;
-		context.fillText("The Mormon Trail", horizontalCenter, 20);
-		context.fillText("by Kevin Owens", horizontalCenter, 30);
-		
-		context.textAlign = 'left';
-		context.fillStyle = 'white';
-		context.fillText("Choose four family members:", 20, 50);
-		context.fillText("Press SPACE to choose someone", 20, 172);
-		
-		var names = [
-			{ name: 'Joseph', isAdult: true, selected: false },
-			{ name: 'Emma', isAdult: true, selected: false }, 
-			{ name: 'Brigham', isAdult: true, selected: false }, 
-			{ name: 'Lucy', isAdult: true, selected: false }, 
-			{ name: 'John', isAdult: false, selected: false }, 
-			{ name: 'Mary', isAdult: false, selected: false }, 
-			{ name: 'Alma', isAdult: false, selected: false }, 
-			{ name: 'Eliza', isAdult: false, selected: false }
-		];
-		var cursor = 0;
-		var selectedCount = 0;
-		drawCharacterMenu(cursor, names);
-		
-		window.document.onkeydown = function(event) {
-			switch (event.keyCode) {
-				case keyboard.ENTER:
-					if (selectedCount == partySize) {
-						window.document.onkeydown = null;
-						for (var i = 0; i < names.length; i++) {
-							var name = names[i];
-							if (name.selected) {
-								party.push(name);
-							}
-						}
-						buySupplies();
-					}
-					break;
-				case keyboard.SPACE:
-					if (names[cursor].selected) {
-						names[cursor].selected = false;
-						selectedCount--;
-						context.clearRect(17, 175, 240, 13);
-					}
-					else if (selectedCount < partySize) {
-						names[cursor].selected = true;
-						selectedCount++;
-						if (selectedCount == partySize) {
-							context.beginPath();
-							context.rect(17, 175, 240, 13);
-							context.fillStyle = 'white';
-							context.fill();
-		
-							context.fillStyle = 'black';
-							context.fillText("Press ENTER to continue", 20, 185);
-						}
-					}
-					drawCharacterMenu(cursor, names);
-					break;
-				case keyboard.LEFT:
-					if (cursor % 2 == 1) {
-						cursor--;
-						drawCharacterMenu(cursor, names);
-					}
-					break;
-				case keyboard.UP:
-					if (cursor > 1) {
-						cursor -= 2;
-						drawCharacterMenu(cursor, names);
-					}
-					break;
-				case keyboard.RIGHT:
-					if (cursor % 2 == 0) {
-						cursor++;
-						drawCharacterMenu(cursor, names);
-					}
-					break;
-				case keyboard.DOWN:
-					if (cursor < names.length - 2) {
-						cursor += 2;
-						drawCharacterMenu(cursor, names);
-					}
-					break;
-			}
-		}
-	}
-	
-	var drawCharacterMenu = function(cursor, names) {
-		context.clearRect(0, 58, canvas.width, 100);
-		var index = 0;
-		for (var row = 0; row < 4; row++) {
-			for (var col = 0; col < 2; col++) {
-				
-				var x = 20 + col * 100;
-				var y = 60 + row * 25;
-				if (index === cursor) {				
-					context.beginPath();
-					context.rect(x - 2, y - 2, 24, 24);
-					context.fillStyle = 'white';
-					context.fill();
-				}
-			
-				var name = names[index];
-				sprites[name.name.toLowerCase()].render(context, x, y);
-				if (name.selected) {
-					context.fillStyle = 'white';
-				}
-				else {
-					context.fillStyle = 'gray';
-				}
-				context.fillText(name.name, x + 25, y + 12);
-				index++;
-			}
-		}	
-	}
-	
 	var onMouseDown = function(event) {
         event.preventDefault();
 		var x = event.pageX - canvas.offsetLeft;
@@ -811,7 +672,6 @@ var game = new function() {
 	}
 	
 	var start = function() {
-	
 		window.document.onkeydown = function(event) {
 			switch (event.keyCode) {
 				case keyboard.ENTER:

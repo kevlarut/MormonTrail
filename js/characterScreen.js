@@ -1,0 +1,151 @@
+var characterScreen = new function() {
+	var callback = null;
+	var canvas = null;
+	var context = null;
+	var sprites = null;
+	var self = this;
+	var party = [];
+
+	this.start = function(canvas, context, sprites, callback) {
+		this.callback = callback;
+		this.canvas = canvas;
+		this.context = context;
+		this.sprites = sprites;
+
+		this.chooseCharacterNames();
+	}
+
+	this.drawCharacterMenu = function(cursor, names) {
+		this.context.clearRect(0, 58, this.canvas.width, 100);
+		var index = 0;
+		for (var row = 0; row < 4; row++) {
+			for (var col = 0; col < 2; col++) {
+				
+				var x = 20 + col * 100;
+				var y = 60 + row * 25;
+				if (index === cursor) {				
+					this.context.beginPath();
+					this.context.rect(x - 2, y - 2, 24, 24);
+					this.context.fillStyle = 'white';
+					this.context.fill();
+				}
+			
+				var name = names[index];
+				this.sprites[name.name.toLowerCase()].render(this.context, x, y);
+				if (name.selected) {
+					this.context.fillStyle = 'white';
+				}
+				else {
+					this.context.fillStyle = 'gray';
+				}
+				this.context.fillText(name.name, x + 25, y + 12);
+				index++;
+			}
+		}	
+	}
+
+	this.chooseCharacterNames = function() {	
+		audioPlayer.stopAllAudio();
+	
+		var partySize = 4;
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		
+		this.context.beginPath();
+		this.context.rect(20, 10, 240, 25);
+		this.context.fillStyle = 'white';
+		this.context.fill();
+			
+		this.context.textAlign = 'center';
+		this.context.font = "8px 'Here Lies MECC'";
+		this.context.fillStyle = 'black';
+		
+		var horizontalCenter = this.canvas.width / 2;
+		this.context.fillText("Zion or Bust", horizontalCenter, 20);
+		this.context.fillText("by Kevin Owens", horizontalCenter, 30);
+		
+		this.context.textAlign = 'left';
+		this.context.fillStyle = 'white';
+		this.context.fillText("Choose four family members:", 20, 50);
+		this.context.fillText("Press SPACE to choose someone", 20, 172);
+		
+		var names = [
+			{ name: 'Joseph', isAdult: true, selected: false },
+			{ name: 'Emma', isAdult: true, selected: false }, 
+			{ name: 'Brigham', isAdult: true, selected: false }, 
+			{ name: 'Lucy', isAdult: true, selected: false }, 
+			{ name: 'John', isAdult: false, selected: false }, 
+			{ name: 'Mary', isAdult: false, selected: false }, 
+			{ name: 'Alma', isAdult: false, selected: false }, 
+			{ name: 'Eliza', isAdult: false, selected: false }
+		];
+		var cursor = 0;
+		var selectedCount = 0;
+		this.drawCharacterMenu(cursor, names);
+		
+		window.document.onkeydown = function(event) {
+			switch (event.keyCode) {
+				case keyboard.ENTER:
+					if (selectedCount == partySize) {
+						window.document.onkeydown = null;
+						for (var i = 0; i < names.length; i++) {
+							var name = names[i];
+							if (name.selected) {
+								party.push(name);
+							}
+						}
+						end();
+					}
+					break;
+				case keyboard.SPACE:
+					if (names[cursor].selected) {
+						names[cursor].selected = false;
+						selectedCount--;
+						self.context.clearRect(17, 175, 240, 13);
+					}
+					else if (selectedCount < partySize) {
+						names[cursor].selected = true;
+						selectedCount++;
+						if (selectedCount == partySize) {
+							self.context.beginPath();
+							self.context.rect(17, 175, 240, 13);
+							self.context.fillStyle = 'white';
+							self.context.fill();
+		
+							self.context.fillStyle = 'black';
+							self.context.fillText("Press ENTER to continue", 20, 185);
+						}
+					}
+					self.drawCharacterMenu(cursor, names);
+					break;
+				case keyboard.LEFT:
+					if (cursor % 2 == 1) {
+						cursor--;
+						self.drawCharacterMenu(cursor, names);
+					}
+					break;
+				case keyboard.UP:
+					if (cursor > 1) {
+						cursor -= 2;
+						self.drawCharacterMenu(cursor, names);
+					}
+					break;
+				case keyboard.RIGHT:
+					if (cursor % 2 == 0) {
+						cursor++;
+						self.drawCharacterMenu(cursor, names);
+					}
+					break;
+				case keyboard.DOWN:
+					if (cursor < names.length - 2) {
+						cursor += 2;
+						self.drawCharacterMenu(cursor, names);
+					}
+					break;
+			}
+		}
+	}	
+
+	function end() {
+		self.callback(party);
+	}
+}

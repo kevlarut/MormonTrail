@@ -1,5 +1,4 @@
 var buffaloChipsMiniGame = new function() {	
-
 	var _canvas = null;
 	var _context = null;
 	var _sprites = null;	
@@ -91,8 +90,7 @@ var buffaloChipsMiniGame = new function() {
 		}
 	}
 	
-	this.start = function(canvas, context, sprites, audioAssets, callback) {
-	
+	this.start = function(canvas, context, sprites, audioAssets, callback) {	
 		_canvas = canvas;
 		_context = context;
 		_sprites = sprites;
