@@ -22,8 +22,15 @@ var spriteAssets = {
 	'hunter-left': ['img/hunter-left.gif'],
 	'hunter-right': ['img/hunter-right.gif'],
 	'hunting-background': ['img/hunting-background.gif'],
-	'splash': ['img/splash.gif'],
-	
+	'rabbit': [
+		'img/rabbit-1.png',
+		'img/rabbit-2.png',
+		'img/rabbit-3.png',
+		'img/rabbit-4.png',
+		'img/rabbit-5.png',
+	],
+	'rabbit-dead': ['img/rabbit-dead.png'],
+	'splash': ['img/splash.gif'],	
 	'echo-canyon': ['img/echo-canyon.gif'],
 	'emigration-canyon': ['img/emigration-canyon.gif'],
 	'fort-laramie': ['img/fort-laramie.gif'],

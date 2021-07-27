@@ -13,9 +13,11 @@ var huntingMiniGame = new function() {
 	var _direction = "left";
 	var _lastFireTime = 0;
 	var _rateOfFire = 1000;
+	var _rabbitSprite = null;
+	var _deadRabbitSprite = null;
 
 	var bullets = [];
-	var _deadBuffalo = [];
+	var _deadAnimals = [];
 	
 	var x = 0, 
 		y = 0, 
@@ -38,18 +40,18 @@ var huntingMiniGame = new function() {
 		var spritesToRender = [];
 		animals.forEach(animal => 
 			spritesToRender.push({
-				sprite: _buffaloSprite,
+				sprite: animal.sprite,
 				x: animal.x, 
 				y: animal.y,
-				z: animal.y + _buffaloSprite.height,
+				z: animal.y + animal.sprite.height,
 			})
 		);
-		_deadBuffalo.forEach(corpse => 
+		_deadAnimals.forEach(corpse => 
 			spritesToRender.push({
-				sprite: _deadBuffaloSprite,
+				sprite: corpse.sprite,
 				x: corpse.x, 
 				y: corpse.y,
-				z: corpse.y + _deadBuffaloSprite.height,
+				z: corpse.y + corpse.sprite.height,
 			})
 		);
 		spritesToRender.push({
@@ -91,25 +93,49 @@ var huntingMiniGame = new function() {
 	}
 
 	var spawnAnimal = function() {
-		var height = _buffaloSprite.height;
-		var width = _buffaloSprite.width;
+		var randomNumber = Math.random();
+		if (randomNumber < 0.25) {
+			return spawnBuffalo();
+		} else {
+			return spawnRabbit();
+		}
+	}
+
+	var spawnBuffalo = function() {
+		return spawnAnimalWithSprite(_buffaloSprite, _deadBuffaloSprite, 200);
+	}
+
+	var spawnRabbit = function() {
+		return spawnAnimalWithSprite(_rabbitSprite, _deadRabbitSprite, 3);
+	}
+
+	var spawnAnimalWithSprite = function(sprite, deadSprite, averageYield) {
+		var height = sprite.height;
+		var width = sprite.width;
 		
 		var x = 0 - width;
 		var y = Math.floor(Math.random() * (_canvas.height - height - 15)) + 15;
-		var speed = Math.floor(Math.random() * 10) + 3;
+		var speed = Math.floor(Math.random() * 10) + 5;
 		
 		return {
+			averageYield: averageYield,
+			deadSprite: deadSprite,
 			speed: speed,
+			sprite: sprite,
 			x: x,
 			y: y
-		};		
+		};	
 	}
 	
 	var handleCollision = function(animalIndex) {		
 		if (animalIndex != null) {
-			_deadBuffalo.push({
-				x: animals[animalIndex].x,
-				y: animals[animalIndex].y,
+			var animal = animals[animalIndex];
+			var meat = Math.round(Math.random() * animal.averageYield) + animal.averageYield;
+			_deadAnimals.push({
+				sprite: animal.deadSprite,
+				x: animal.x,
+				y: animal.y,
+				meat: meat,
 			});
 			animals.splice(animalIndex, 1);
 			score++;
@@ -119,8 +145,6 @@ var huntingMiniGame = new function() {
 	var detectCollision = function() {
 		var animalHeight = _buffaloSprite.height;
 		var animalWidth = _buffaloSprite.width;
-		var hunterHeight = _hunterSprite.height;
-		var hunterWidth = _hunterSprite.width;
 		var bulletWidth = 2;
 		var bulletHeight = 2;
 		var animalHitBoxMargin = 3;
@@ -142,7 +166,7 @@ var huntingMiniGame = new function() {
 	var end = function(meat) {
 		timeRemaining = DEFAULT_TIME_REMAINING;
 		animals = [];
-		_deadBuffalo = [];
+		_deadAnimals = [];
 		score = 0;
 		window.document.onkeydown = null;
 		_callback(meat);
@@ -150,8 +174,8 @@ var huntingMiniGame = new function() {
 	
 	var showPostMortem = function() {
 		var meat = 0;
-		for (var i = 0; i < score; i++) {
-			meat += Math.round(Math.random() * 200) + 200;
+		for (var i = 0; i < _deadAnimals.length; i++) {
+			meat += _deadAnimals[i].meat;
 		}
 		meat = Math.round(meat);
 		
@@ -234,9 +258,11 @@ var huntingMiniGame = new function() {
 		_context = context;
 		_sprites = sprites;
 		_callback = callback;
-		_buffaloSprite = _sprites['buffalo'];
+		_buffaloSprite = _sprites['buffalo'];		
 		_deadBuffaloSprite = _sprites['buffalo-dead'];
 		_hunterSprite = _sprites['hunter-' + _direction];
+		_rabbitSprite = sprites['rabbit'];
+		_deadRabbitSprite = sprites['rabbit-dead'];
 			
 		var horizontalCenter = _canvas.width / 2;
 		

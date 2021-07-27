@@ -187,24 +187,41 @@ var game = new function() {
 	}
 	
 	var giveSomeoneADiseaseAndShowADialogBoxAboutIt = function() {	
-	
+		var cholera = {
+			name: 'cholera',
+			duration: 14,
+			chanceOfDeath: 0.5
+		};
+		var dysentery = {
+			name: 'dysentery',
+			duration: 7,
+			chanceOfDeath: 0.1
+		};
 		var rockyMountainFever = {
 			name: 'mountain fever',
 			duration: 14,
 			chanceOfDeath: 0.225
 		};
+		var typhus = {
+			name: 'typhus',
+			duration: 14,
+			chanceOfDeath: 0.1
+		};
+		const diseases = [cholera, dysentery, rockyMountainFever, typhus];
+		var randomDiseaseIndex = Math.floor(Math.random() * (diseases.length));
+		const disease = diseases[randomDiseaseIndex];
 	
 		var min = 0;
 		var max = party.length;
 		var randomIndex = Math.floor(Math.random() * (max - min)) + min;
 		var person = party[randomIndex];
 		if (typeof person.disease == 'undefined' || person.disease == null) {
-			person.disease = rockyMountainFever;
-			setFutureEvent(rockyMountainFever.duration, function() {				
-				resolveDisease(person, rockyMountainFever);
+			person.disease = disease;
+			setFutureEvent(disease.duration, function() {				
+				resolveDisease(person, disease);
 			});
 			var personName = person.name;
-			var message = personName + ' has ' + rockyMountainFever.name + '.';
+			var message = personName + ' has ' + disease.name + '.';
 			showMessageForPerson(personName, message);			
 		}
 		else {
@@ -320,7 +337,7 @@ var game = new function() {
 						return;
 					}
 				}
-				else if (randomNumber < 1000) { //TODO: 0.01 is more balanced
+				else if (randomNumber < 0.01) {
 					if (roadometer - _lastHuntingEventMile >= minimumMilesBetweenSameRandomEvent) {
 						_lastHuntingEventMile = roadometer;
 						if (!nonFoodInventory.some(item => item.name === "Flintlock musket")) {							
@@ -564,14 +581,14 @@ var game = new function() {
 		};
 		var items = [
 			{
-				name: 'Spiffy home decorations',
-				weight: 60,
+				name: 'Flintlock musket',
+				weight: 10,
 				isSelected: false,
 				isRequired: false
 			},
 			{
-				name: 'Flintlock musket',
-				weight: 10,
+				name: 'Spiffy home decorations',
+				weight: 60,
 				isSelected: false,
 				isRequired: false
 			},
