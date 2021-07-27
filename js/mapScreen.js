@@ -1,4 +1,4 @@
-var ponderScreen = new function() {
+var mapScreen = new function() {
     var canvas = null;
     var context = null;
     var callback = null;
@@ -10,35 +10,34 @@ var ponderScreen = new function() {
         this.context = context;
         this.callback = callback;
 		this.sprites = sprites;
-		this.initialize();	
-	}
-    
-	this.initialize = function() {
+	
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		
+				
+		this.sprites["map"].render(this.context, 0, 0);
+
 		this.context.textAlign = 'left';
 		this.context.font = "8px 'Here Lies MECC'";					
 		this.context.fillStyle = 'white';
 		
-		this.context.fillText("You may:", 10, 10);
-		this.context.fillText("1. Continue on the trail", 20, 30);
-		this.context.fillText("2. Look at map", 20, 40);
-		this.context.fillText("What is your choice?", 10, 180);
+		
+		context.beginPath();
+		context.rect(40, 170, 200, 20);
+		context.fillStyle = 'black';
+		context.fill();
+
+		context.fillStyle = 'white';
+		this.context.fillText("Press ENTER to continue", 50, 183);
 
 		window.document.onkeydown = function(event) {
 			switch (event.keyCode) {
-				case keyboard.ONE:
+				case keyboard.ENTER:
 					window.document.onkeydown = null;
 					self.end();
-					break;
-				case keyboard.TWO:
-					window.document.onkeydown = null;
-					mapScreen.start(self.canvas, self.context, self.sprites, self.initialize);
 					break;
 			}
 		}
 	}
-
+    
     this.end = function() {
         this.callback();
     }

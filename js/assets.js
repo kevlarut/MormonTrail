@@ -34,11 +34,11 @@ var spriteAssets = {
 	'echo-canyon': ['img/echo-canyon.gif'],
 	'emigration-canyon': ['img/emigration-canyon.gif'],
 	'fort-laramie': ['img/fort-laramie.gif'],
+	'map': ['img/map.png'],
 	'martins-cove': ['img/martins-cove.gif'],
 	'salt-lake-valley': ['img/salt-lake-valley.gif'],
 	'sugar-creek': ['img/sugar-creek.gif'],
-	'winter-quarters': ['img/winter-quarters.gif'],
-	
+	'winter-quarters': ['img/winter-quarters.gif'],	
 	'alma': ['img/alma.gif'],	
 	'alma-walking': [
 		'img/alma-walking-1.gif', 

@@ -545,7 +545,7 @@ var game = new function() {
 			switch (event.keyCode) {
 				case keyboard.ENTER:
 					game.togglePause();
-					ponderScreen.start(canvas, context, resume);
+					ponderScreen.start(canvas, context, sprites, resume);
 					break;
 			}
 		}
