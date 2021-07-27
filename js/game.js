@@ -116,6 +116,7 @@ var game = new function() {
 		sprites[personName.toLowerCase()].render(context, 5, 97);
 		drawDialogBoxBesidePortrait(message);
 		setEnterToResume();
+		setTouchAnywhereToResume();
 	}
 	
 	var setFutureEvent = function(daysInFuture, delegate) {
@@ -129,8 +130,9 @@ var game = new function() {
 	}
 	
 	var gameOver = function() {	
-		clearInterval(gameLoopInterval);
+		clearInterval(gameLoopInterval);		
 		window.document.onkeydown = null;
+		this.touchHandler = null;
 		date = new Date(1847, 4, 5);
 		roadometer = 0;
 		isPaused = false;
@@ -415,6 +417,7 @@ var game = new function() {
 				roadometer = nextLandmarkMiles;
 				nextLandmarkIndex++;
 				setEnterToResume();
+				setTouchAnywhereToResume();
 				
 				context.clearRect(0, 0, canvas.width, canvas.height);
 				sprites[nextLandmark.sprite].render(context, 0, 0);
@@ -449,7 +452,6 @@ var game = new function() {
 						song.element.play();
 					}
 					
-					window.document.onkeydown = null;
 					window.document.onkeydown = function(event) {		  
 						switch (event.keyCode) {
 							case keyboard.ENTER:	
@@ -457,6 +459,7 @@ var game = new function() {
 								break;
 						}
 					}
+					this.touchHandler = gameOver;
 				}
 				else {				
 					context.textAlign = 'center';
@@ -571,6 +574,14 @@ var game = new function() {
 					break;
 			}
 		}
+	}
+	
+	this.handleTouchInputAsResume = function(x, y) {
+		resume();
+	}
+
+	var setTouchAnywhereToResume = function() {
+		game.touchHandler = game.handleTouchInputAsResume;
 	}
 }
 
