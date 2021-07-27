@@ -511,6 +511,7 @@ var game = new function() {
 		var x = event.pageX - canvas.offsetLeft;
 		var y = event.pageY - canvas.offsetTop;
 		handleTouchInput(x, y);
+		return false;
 	}
 	
 	var onTouchStart = function(event) {
@@ -518,10 +519,15 @@ var game = new function() {
 		var x = event.targetTouches[0].pageX - canvas.offsetLeft;
 		var y = event.targetTouches[0].pageY - canvas.offsetTop;
 		handleTouchInput(x, y);
+		return false;
 	}
 	
 	var handleTouchInput = function(x, y) {
 		if (self.touchHandler != null) {
+			var scale = window.innerHeight / canvas.height;
+			x /= scale;
+			y /= scale;	
+
 			self.touchHandler(x, y);
 		}
 	}
@@ -535,7 +541,6 @@ var game = new function() {
 		preLoadImages();
 		
 		canvas.addEventListener("touchstart", onTouchStart, false);
-        canvas.addEventListener("mousedown", onMouseDown, false);
         document.addEventListener("mousedown", onMouseDown, false);
 	}
 	

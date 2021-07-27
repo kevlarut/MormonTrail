@@ -7,6 +7,7 @@ var characterScreen = new function() {
 	var party = [];
 	var touchZones = [];
 	var names = [];
+	var cursor = 0;
 
 	this.start = function(canvas, context, sprites, callback) {
 		this.callback = callback;
@@ -15,8 +16,8 @@ var characterScreen = new function() {
 		this.sprites = sprites;
 
 		this.touchZones = [];
-		for (var index = 0, row = 0; row < 4; row++, index++) {
-			for (var col = 0; col < 2; col++) {				
+		for (var index = 0, row = 0; row < 4; row++) {
+			for (var col = 0; col < 2; col++, index++) {				
 				var x = 20 + col * 100;
 				var y = 60 + row * 25;
 				this.touchZones.push({
@@ -96,7 +97,6 @@ var characterScreen = new function() {
 			{ name: 'Alma', isAdult: false, selected: false }, 
 			{ name: 'Eliza', isAdult: false, selected: false }
 		];
-		var cursor = 0;
 		this.selectedCount = 0;
 		this.drawCharacterMenu(cursor, this.names);
 		
@@ -120,24 +120,28 @@ var characterScreen = new function() {
 				case keyboard.LEFT:
 					if (cursor % 2 == 1) {
 						cursor--;
+						console.log("cursor is ", cursor);
 						self.drawCharacterMenu(cursor, self.names);
 					}
 					break;
 				case keyboard.UP:
 					if (cursor > 1) {
 						cursor -= 2;
+						console.log("cursor is ", cursor);
 						self.drawCharacterMenu(cursor, self.names);
 					}
 					break;
 				case keyboard.RIGHT:
 					if (cursor % 2 == 0) {
 						cursor++;
+						console.log("cursor is ", cursor);
 						self.drawCharacterMenu(cursor, self.names);
 					}
 					break;
 				case keyboard.DOWN:
 					if (cursor < self.names.length - 2) {
 						cursor += 2;
+						console.log("cursor is ", cursor);
 						self.drawCharacterMenu(cursor, names);
 					}
 					break;
@@ -145,39 +149,50 @@ var characterScreen = new function() {
 		}
 	}	
 	
-	this.handleTouchInput = function(globalX, globalY) {
-		var x = globalX / 2;
-		var y = globalY / 2;
-		console.log("Kevin, character screen received a touch at ", x, y);
+	this.setCursor = (cursor) => {
+		self.cursor = cursor;
+		console.log("cursor is ", cursor);		
+	}
+
+	this.handleTouchInput = function(x, y) {
 		for (var i = 0; i < self.touchZones.length; i++) {
 			var zone = self.touchZones[i];
 			if (x >= zone.left && x <= zone.right && y >= zone.top && y <= zone.bottom) {
-				self.toggleSelected(zone.nameIndex);
+				cursor = zone.nameIndex;
+				self.toggleSelected(cursor);
 				return;
 			}
 		}
 	}
 
+	this.selectCharacter = (nameIndex) => {
+		if (self.selectedCount >= self.partySize) {
+			return;
+		}
+		self.names[nameIndex].selected = true;
+		self.selectedCount++;
+		if (self.selectedCount == self.partySize) {
+			self.context.beginPath();
+			self.context.rect(17, 175, 240, 13);
+			self.context.fillStyle = 'white';
+			self.context.fill();
+
+			self.context.fillStyle = 'black';
+			self.context.fillText("Press ENTER to continue", 20, 185);
+		}
+		self.drawCharacterMenu(nameIndex, self.names);
+	}
+
 	this.toggleSelected = (nameIndex) => {
+		console.log("toggleSelected for ", self.names[nameIndex].name, self.names[nameIndex].selected);
 		if (self.names[nameIndex].selected) {
 			self.names[nameIndex].selected = false;
 			self.selectedCount--;
 			self.context.clearRect(17, 175, 240, 13);
+			self.drawCharacterMenu(nameIndex, self.names);
+		} else {
+			self.selectCharacter(nameIndex);
 		}
-		else if (self.selectedCount < self.partySize) {
-			self.names[nameIndex].selected = true;
-			self.selectedCount++;
-			if (self.selectedCount == self.partySize) {
-				self.context.beginPath();
-				self.context.rect(17, 175, 240, 13);
-				self.context.fillStyle = 'white';
-				self.context.fill();
-
-				self.context.fillStyle = 'black';
-				self.context.fillText("Press ENTER to continue", 20, 185);
-			}
-		}
-		self.drawCharacterMenu(nameIndex, self.names);
 	}
 
 	this.end = function() {
