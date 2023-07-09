@@ -20,7 +20,12 @@ var game = new function() {
 	var _lastShoulderMile = 0;
 	var _lastStarvationEventMile = 0;
 	var futureEvents = [];
+	var lastRestDate = new Date(1847, 4, 5);
 	
+	this.setLastRestDate = function() {
+		lastRestDate = new Date(date.getTime());
+	}
+
 	this.togglePause = function() {
 		isPaused = !isPaused;
 	}
@@ -111,6 +116,19 @@ var game = new function() {
 		context.fillText('Press ENTER to continue.', horizontalCenter, 115);
 	}
 	
+	this.showMessage = function(message) {
+		context.clearRect(0, 95, canvas.width, 20);	
+
+		var horizontalCenter = (canvas.width / 2);
+		context.textAlign = 'center';
+		context.fillStyle = 'white';
+		context.fillText(message, horizontalCenter, 105);
+		context.fillText('Press ENTER to continue.', horizontalCenter, 115);
+
+		setEnterToResume();
+		setTouchAnywhereToResume();
+	}
+
 	var showMessageForPerson = function(personName, message) {
 		context.clearRect(0, 95, canvas.width, 20);	
 		sprites[personName.toLowerCase()].render(context, 5, 97);
@@ -180,6 +198,10 @@ var game = new function() {
 		}
 	}
 	
+	var tellThemTheyDidNotGetADiseaseBecauseTheyAreWellRested = function() {
+		self.showMessage("Since you rested you don't get sick.");
+	}
+
 	var giveSomeoneADiseaseAndShowADialogBoxAboutIt = function() {	
 		var cholera = {
 			name: 'cholera',
@@ -358,10 +380,20 @@ var game = new function() {
 					}
 				}
 				else if (randomNumber < 0.02) {
-					if (roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameRandomEvent) {
-						_lastDiseaseEventMile = roadometer;
+					if (roadometer - _lastDiseaseEventMile >= minimumMilesBetweenSameRandomEvent) {						
+						_lastDiseaseEventMile = roadometer;						
 						isPaused = true;
-						giveSomeoneADiseaseAndShowADialogBoxAboutIt();
+						
+						var millisecondsSinceLastRest = date - lastRestDate
+						var daysSinceLastRest = millisecondsSinceLastRest / (1000 * 60 * 60 * 24);
+						var partyIsWellRested = daysSinceLastRest < 3;
+						
+						if (partyIsWellRested) {
+							tellThemTheyDidNotGetADiseaseBecauseTheyAreWellRested();
+						} else {
+							giveSomeoneADiseaseAndShowADialogBoxAboutIt();
+						}
+
 						return;
 					}
 				} else if (randomNumber < 0.025) {

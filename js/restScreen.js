@@ -16,6 +16,7 @@ var restScreen = new function() {
 		if (inventory.buffaloChips >= 1) {
 			this.sprites["rest-fire"].render(this.context, 0, 0);
 			inventory.buffaloChips -= 1;
+			game.setLastRestDate();
 		} else {
 			this.sprites["rest-cold"].render(this.context, 0, 0);
 		}
