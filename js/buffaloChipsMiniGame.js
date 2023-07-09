@@ -69,6 +69,7 @@ var buffaloChipsMiniGame = new function() {
 	}
 	
 	var end = function() {
+		inventory.buffaloChips += score;
 		timeRemaining = 10;
 		chips = [];
 		score = 0;
