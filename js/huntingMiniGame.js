@@ -14,7 +14,9 @@ var huntingMiniGame = new function() {
 	var _lastFireTime = 0;
 	var _rateOfFire = 1000;
 	var _rabbitSprite = null;
-	var _deadRabbitSprite = null;
+	var _deadRabbitSprite = null;	
+	var _pronghornSprite = null;
+	var _deadPronghornSprite = null;
 
 	var bullets = [];
 	var _deadAnimals = [];
@@ -94,36 +96,46 @@ var huntingMiniGame = new function() {
 
 	var spawnAnimal = function() {
 		var randomNumber = Math.random();
-		if (randomNumber < 0.25) {
+		if (randomNumber < 0.1) {
 			return spawnBuffalo();
-		} else {
+		} else if (randomNumber < 0.3) {
+			return spawnPronghorn();
+		}else {
 			return spawnRabbit();
 		}
 	}
 
 	var spawnBuffalo = function() {
-		return spawnAnimalWithSprite(_buffaloSprite, _deadBuffaloSprite, 200);
+		return spawnAnimalWithSprite(_buffaloSprite, _deadBuffaloSprite, 200, RIGHT);
 	}
-
+	var spawnPronghorn = function() {
+		return spawnAnimalWithSprite(_pronghornSprite, _deadPronghornSprite, 35, LEFT);
+	}
 	var spawnRabbit = function() {
-		return spawnAnimalWithSprite(_rabbitSprite, _deadRabbitSprite, 3);
+		return spawnAnimalWithSprite(_rabbitSprite, _deadRabbitSprite, 3, RIGHT);
 	}
 
-	var spawnAnimalWithSprite = function(sprite, deadSprite, averageYield) {
+	var spawnAnimalWithSprite = function(sprite, deadSprite, averageYield, runDirection) {
 		var height = sprite.height;
 		var width = sprite.width;
-		
-		var x = 0 - width;
+				
+		var x;
+		if (runDirection === RIGHT) {
+			x = 0 - width;
+		} else {
+			x = _canvas.width;
+		}
 		var y = Math.floor(Math.random() * (_canvas.height - height - 15)) + 15;
 		var speed = Math.floor(Math.random() * 10) + 5;
 		
 		return {
 			averageYield: averageYield,
 			deadSprite: deadSprite,
+			runDirection: runDirection,
 			speed: speed,
 			sprite: sprite,
 			x: x,
-			y: y
+			y: y,
 		};	
 	}
 	
@@ -219,7 +231,12 @@ var huntingMiniGame = new function() {
 			animals.push(spawnAnimal());
 		}	
 		for (var i = 0; i < animals.length; i++) {
-			animals[i].x += animals[i].speed;
+			var animal = animals[i];
+			if (animal.runDirection === RIGHT) {
+				animal.x += animal.speed;
+			} else {
+				animal.x -= animal.speed;
+			}
 		}
 		var bulletSpeed = 12;
 		for (var i = bullets.length - 1; i >= 0; i--) {
@@ -263,7 +280,8 @@ var huntingMiniGame = new function() {
 		_hunterSprite = _sprites['hunter-' + _direction];
 		_rabbitSprite = sprites['rabbit'];
 		_deadRabbitSprite = sprites['rabbit-dead'];
-			
+		_pronghornSprite = _sprites['pronghorn'];		
+		_deadPronghornSprite = _sprites['pronghorn-dead'];
 		var horizontalCenter = _canvas.width / 2;
 		
 		context.clearRect(0, 0, canvas.width, canvas.height);

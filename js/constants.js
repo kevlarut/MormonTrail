@@ -1,1 +1,3 @@
 var HANDCART_CAPACITY = 500;
+var LEFT = 0;
+var RIGHT = 1;

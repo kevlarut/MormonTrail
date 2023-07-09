@@ -30,6 +30,13 @@ var spriteAssets = {
 		'img/rabbit-5.png',
 	],
 	'rabbit-dead': ['img/rabbit-dead.png'],
+	'pronghorn': [
+		'img/pronghorn-1.png',
+		'img/pronghorn-2.png',
+		'img/pronghorn-3.png',
+		'img/pronghorn-4.png',
+	],
+	'pronghorn-dead': ['img/pronghorn-1.png'],
 	'splash': ['img/splash.gif'],	
 	'echo-canyon': ['img/echo-canyon.gif'],
 	'emigration-canyon': ['img/emigration-canyon.gif'],
