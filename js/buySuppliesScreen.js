@@ -62,7 +62,13 @@ var buySuppliesScreen = new function() {
 				isSelected: false,
 				isRequired: false
 			},
-			clothingAndSuchlike
+			clothingAndSuchlike,
+			{
+				name: 'Ammunition',
+				weight: 1,
+				isSelected: false,
+				isRequired: false
+			},
 		];
 		
 		this.nonFoodInventory.push(clothingAndSuchlike);
@@ -82,10 +88,6 @@ var buySuppliesScreen = new function() {
 				case keyboard.ENTER:
 					self.end();
 					break;
-				case keyboard.X:
-				case keyboard.SPACE:
-					self.toggleItem(self.cursor);
-					break;
 				case keyboard.UP:
 					if (self.cursor > 0) {
 						self.cursor--;
@@ -93,10 +95,18 @@ var buySuppliesScreen = new function() {
 					}
 					break;
 				case keyboard.DOWN:
-					if (self.cursor < self.items.length - 2) {
+					if (self.cursor < self.items.length - 1) {
 						self.cursor++;
 						self.drawBuySuppliesMenu(self.cursor);
 					}
+					break;
+				case keyboard.X:
+				case keyboard.SPACE:
+					self.toggleItem(self.cursor);
+					break;
+				case keyboard.ONE:
+					console.log("1");
+					self.drawBuySuppliesMenu(self.cursor);
 					break;
 			}
 		}
@@ -169,13 +179,13 @@ var buySuppliesScreen = new function() {
 			}
 			
 			this.context.textAlign = 'left';
-			this.context.fillText('[' + (item.isSelected ? 'X' : ' ') + '] ' + item.name, 10, y);				
+			this.context.fillText((line + 1) + '. ' + (item.isSelected ? "X " : "  ") + item.name, 10, y);
 			this.context.textAlign = 'right';
 			this.context.fillText(item.weight + '#', 275, y);
 		}
 		
 		this.context.textAlign = 'left';
-		this.context.fillText('You will carry ' + self.food + ' pounds of food.', 10, 40 + line * 15);
+		this.context.fillText('Handcart capacity left: ' + self.food + " pounds", 10, 40 + line * 15);
 	}
 	
 	this.handleTouchInput = function(x, y) {
